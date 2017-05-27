@@ -1,0 +1,737 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Erlang," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="简介&amp;emsp;&amp;emsp;本文学习Erlang启动过程中涉及到的Erlang源代码。学习环境为linux，Erlang/OTP代码版本是R16B03-1。erl实际上是个shell脚本，设置几个环境变量后，调用exec执行erlexec，代码在/erts/etc/common/erlexec.c中。erlexec分析erl传入的参数和环境变量，选择正确版本的beam(例如在smp环境中，运行的就">
+<meta name="keywords" content="Erlang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Erlang启动过程学习">
+<meta property="og:url" content="https://hengzheng.github.io/2017/Erlang启动过程学习/index.html">
+<meta property="og:site_name" content="充电桩">
+<meta property="og:description" content="简介&amp;emsp;&amp;emsp;本文学习Erlang启动过程中涉及到的Erlang源代码。学习环境为linux，Erlang/OTP代码版本是R16B03-1。erl实际上是个shell脚本，设置几个环境变量后，调用exec执行erlexec，代码在/erts/etc/common/erlexec.c中。erlexec分析erl传入的参数和环境变量，选择正确版本的beam(例如在smp环境中，运行的就">
+<meta property="og:updated_time" content="2017-05-27T09:44:54.604Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Erlang启动过程学习">
+<meta name="twitter:description" content="简介&amp;emsp;&amp;emsp;本文学习Erlang启动过程中涉及到的Erlang源代码。学习环境为linux，Erlang/OTP代码版本是R16B03-1。erl实际上是个shell脚本，设置几个环境变量后，调用exec执行erlexec，代码在/erts/etc/common/erlexec.c中。erlexec分析erl传入的参数和环境变量，选择正确版本的beam(例如在smp环境中，运行的就">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hengzheng.github.io/2017/Erlang启动过程学习/"/>
+
+
+
+
+
+  <title> Erlang启动过程学习 | 充电桩 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">充电桩</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang启动过程学习/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Erlang启动过程学习
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-26T15:16:29+08:00">
+                2017-05-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Erlang/" itemprop="url" rel="index">
+                    <span itemprop="name">Erlang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;本文学习Erlang启动过程中涉及到的Erlang源代码。学习环境为linux，Erlang/OTP代码版本是R16B03-1。erl实际上是个shell脚本，设置几个环境变量后，调用exec执行erlexec，代码在/erts/etc/common/erlexec.c中。erlexec分析erl传入的参数和环境变量，选择正确版本的beam(例如在smp环境中，运行的就是 beam.smp 版本的虚拟机)，然后将传入的参数整理好，加入一些默认参数（如-root,-progname,-home），最后通过系统调用execv运行beam虚拟机。执行erl时加上–emu_args选项可以打印出erl启动参数。beam进程入口是erts/emulator/sys/unix/erl_main.c，其中调用erl_start(argc, argv)，通过erl_start进入到Erlang虚拟机的世界了。erl_start函数在erts/emulator/beam/erl_init.c中，主要进行一些底层的初始化工作，如信号处理、初始化数据结构、启动调度器等，其中通过otp_ring0:start/2启动了Erlang虚拟机的第一个进程init。<br><a id="more"></a></p>
+<h3 id="init"><a href="#init" class="headerlink" title="init"></a>init</h3><p>init:boot/1的代码如下：<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">boot</span><span class="params">(BootArgs)</span> -&gt;</span></div><div class="line">    register(init, self()),</div><div class="line">    process_flag(trap_exit, true),</div><div class="line">    start_on_load_handler_process(),</div><div class="line">    &#123;Start0,Flags,Args&#125; = parse_boot_args(BootArgs),</div><div class="line">    Start = map(fun prepare_run_args/1, Start0),</div><div class="line">    Flags0 = flags_to_atoms_again(Flags),</div><div class="line">    boot(Start,Flags0,Args).</div></pre></td></tr></table></figure></p>
+<p>首先将进程注册为init，然后start_on_load_handler_process/0启动了?ON_LOAD_HANDLER(即init<strong>boot</strong>on_load_handler)进程，记录一些在boot时加载但加载失败的模块，然后在kernel application启动时再次检测这些模块是否可用(默认的boot不加载模块)。代码如下：<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">start_on_load_handler_process</span><span class="params">()</span> -&gt;</span></div><div class="line">    register(?ON_LOAD_HANDLER,</div><div class="line">         spawn(fun on_load_handler_init/0)).</div><div class="line"></div><div class="line"><span class="function"><span class="title">on_load_handler_init</span><span class="params">()</span> -&gt;</span></div><div class="line">    on_load_loop([], false).</div><div class="line"></div><div class="line"><span class="function"><span class="title">on_load_loop</span><span class="params">(Mods, Debug0)</span> -&gt;</span></div><div class="line">    <span class="keyword">receive</span></div><div class="line">    &#123;init_debug_flag,Debug&#125; -&gt;</div><div class="line">        on_load_loop(Mods, Debug);</div><div class="line">    &#123;loaded,Mod&#125; -&gt;</div><div class="line">        on_load_loop([Mod|Mods], Debug0);</div><div class="line">    run_on_load -&gt;</div><div class="line">        run_on_load_handlers(Mods, Debug0),</div><div class="line">        exit(on_load_done)</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="comment">%% 在kernel启动时会调用 </span></div><div class="line"><span class="function"><span class="title">run_on_load_handlers</span><span class="params">()</span> -&gt;</span> </div><div class="line">    Ref = monitor(process, ?ON_LOAD_HANDLER), </div><div class="line">    <span class="keyword">catch</span> ?ON_LOAD_HANDLER ! run_on_load, </div><div class="line">    <span class="keyword">receive</span> </div><div class="line">    &#123;'DOWN',Ref,process,_,noproc&#125; -&gt; </div><div class="line">        <span class="comment">%% There is no on_load handler process, </span></div><div class="line">        <span class="comment">%% probably because init:restart/0 has been </span></div><div class="line">        <span class="comment">%% called and it is not the first time we </span></div><div class="line">        <span class="comment">%% pass through here. </span></div><div class="line">        ok;  </div><div class="line">    &#123;'DOWN',Ref,process,_,on_load_done&#125; -&gt; </div><div class="line">        ok;  </div><div class="line">    &#123;'DOWN',Ref,process,_,Res&#125; -&gt; </div><div class="line">        <span class="comment">%% Failure to run an on_load handler. </span></div><div class="line">        <span class="comment">%% This is fatal during start-up. </span></div><div class="line">        exit(Res) </div><div class="line">    <span class="keyword">end</span>. </div><div class="line"><span class="function"><span class="title">run_on_load_handlers</span><span class="params">([M|Ms], Debug)</span> -&gt;</span></div><div class="line">    debug(Debug, &#123;running_on_load_handler,M&#125;),</div><div class="line">    Fun = <span class="keyword">fun</span>() -&gt;</div><div class="line">          Res = erlang:call_on_load_function(M),</div><div class="line">          exit(Res)</div><div class="line">      <span class="keyword">end</span>,</div><div class="line">    &#123;Pid,Ref&#125; = spawn_monitor(Fun),</div><div class="line">    <span class="keyword">receive</span></div><div class="line">    &#123;'DOWN',Ref,process,Pid,OnLoadRes&#125; -&gt;</div><div class="line">        Keep = OnLoadRes =:= ok,</div><div class="line">        erlang:finish_after_on_load(M, Keep),</div><div class="line">        <span class="keyword">case</span> Keep <span class="keyword">of</span></div><div class="line">        <span class="literal">false</span> -&gt;</div><div class="line">            Error = &#123;on_load_function_failed,M&#125;,</div><div class="line">            debug(Debug, Error),</div><div class="line">            exit(Error);</div><div class="line">        <span class="literal">true</span> -&gt;</div><div class="line">            debug(Debug, &#123;on_load_handler_returned_ok,M&#125;),</div><div class="line">            run_on_load_handlers(Ms, Debug)</div><div class="line">        <span class="keyword">end</span></div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">run_on_load_handlers</span><span class="params">([], _)</span> -&gt;</span> ok.</div></pre></td></tr></table></figure></p>
+<p>parse_boot_args/1解释参数，主要是-extra,-s,-run,-eval,-前缀的flags和其他参数。然后格式化参数（binary/list转换成atom），传递给boot/3，代码如下：<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">boot</span><span class="params">(Start,Flags,Args)</span> -&gt;</span></div><div class="line">    BootPid = do_boot(Flags,Start),</div><div class="line">    State = #state&#123;flags = Flags, </div><div class="line">           args = Args,</div><div class="line">           start = Start,</div><div class="line">           bootpid = BootPid&#125;,</div><div class="line">    boot_loop(BootPid,State).</div><div class="line"></div><div class="line"><span class="comment">%% state结构</span></div><div class="line"><span class="keyword">-record</span><span class="params">(state, &#123;flags = [],</span></div><div class="line">        args = [],</div><div class="line">        start = [],</div><div class="line">        kernel = []                   :: [&#123;atom(), pid()&#125;],</div><div class="line">        bootpid                       :: pid(),</div><div class="line">        status = &#123;starting, starting&#125; :: &#123;internal_status(), term()&#125;,</div><div class="line">        script_id = [],</div><div class="line">        loaded = [],</div><div class="line">        subscribed = []&#125;).</div></pre></td></tr></table></figure></p>
+<p>do_boot/2启动新进程执行boot逻辑，然后设置state进入到boot_loop/2，等待和处理do_boot/2期间的消息。do_boot/2执行完后，最后init进入到loop/1主循环中。boot_loop/2和loop/1代码如下：<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">boot_loop</span><span class="params">(BootPid, State)</span> -&gt;</span></div><div class="line">    <span class="keyword">receive</span></div><div class="line">    &#123;BootPid,loaded,ModLoaded&#125; -&gt;</div><div class="line">        Loaded = State#state.loaded,</div><div class="line">        boot_loop(BootPid,State#state&#123;loaded = [ModLoaded|Loaded]&#125;);</div><div class="line">    &#123;BootPid,started,KernelPid&#125; -&gt;</div><div class="line">        boot_loop(BootPid, new_kernelpid(KernelPid, BootPid, State));</div><div class="line">    &#123;BootPid,progress,started&#125; -&gt;</div><div class="line">            &#123;InS,_&#125; = State#state.status,</div><div class="line">        notify(State#state.subscribed),</div><div class="line">        boot_loop(BootPid,State#state&#123;status = &#123;InS,started&#125;,</div><div class="line">                      subscribed = []&#125;);</div><div class="line">    &#123;BootPid,progress,NewStatus&#125; -&gt;</div><div class="line">            &#123;InS,_&#125; = State#state.status,</div><div class="line">        boot_loop(BootPid,State#state&#123;status = &#123;InS,NewStatus&#125;&#125;);</div><div class="line">    &#123;BootPid,&#123;script_id,Id&#125;&#125; -&gt;</div><div class="line">        boot_loop(BootPid,State#state&#123;script_id = Id&#125;);</div><div class="line">    &#123;'EXIT',BootPid,normal&#125; -&gt;</div><div class="line">            &#123;_,PS&#125; = State#state.status,</div><div class="line">        notify(State#state.subscribed),</div><div class="line">        loop(State#state&#123;status = &#123;started,PS&#125;,</div><div class="line">                 subscribed = []&#125;);</div><div class="line">    &#123;'EXIT',BootPid,Reason&#125; -&gt;</div><div class="line">        erlang:display(&#123;<span class="string">"init terminating in do_boot"</span>,Reason&#125;),</div><div class="line">        crash(<span class="string">"init terminating in do_boot"</span>, [Reason]);</div><div class="line">    &#123;'EXIT',Pid,Reason&#125; -&gt;</div><div class="line">        Kernel = State#state.kernel,</div><div class="line">        terminate(Pid,Kernel,Reason), <span class="comment">%% If Pid is a Kernel pid, halt()!</span></div><div class="line">        boot_loop(BootPid,State);</div><div class="line">    &#123;stop,Reason&#125; -&gt;</div><div class="line">        stop(Reason,State);</div><div class="line">    &#123;From,fetch_loaded&#125; -&gt;   <span class="comment">%% Fetch and reset initially loaded modules.</span></div><div class="line">        From ! &#123;init,State#state.loaded&#125;,</div><div class="line">        garb_boot_loop(BootPid,State#state&#123;loaded = []&#125;);</div><div class="line">    &#123;From,&#123;ensure_loaded,Module&#125;&#125; -&gt;</div><div class="line">        &#123;Res, Loaded&#125; = ensure_loaded(Module, State#state.loaded),</div><div class="line">        From ! &#123;init,Res&#125;,</div><div class="line">        boot_loop(BootPid,State#state&#123;loaded = Loaded&#125;);</div><div class="line">    Msg -&gt;</div><div class="line">        boot_loop(BootPid,handle_msg(Msg,State))</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="comment">%% Here is the main loop after the system has booted.</span></div><div class="line"><span class="function"><span class="title">loop</span><span class="params">(State)</span> -&gt;</span></div><div class="line">    <span class="keyword">receive</span></div><div class="line">    &#123;'EXIT',Pid,Reason&#125; -&gt;</div><div class="line">        Kernel = State#state.kernel,</div><div class="line">        terminate(Pid,Kernel,Reason), <span class="comment">%% If Pid is a Kernel pid, halt()!</span></div><div class="line">        loop(State);</div><div class="line">    &#123;stop,Reason&#125; -&gt;</div><div class="line">        stop(Reason,State);</div><div class="line">    &#123;From,fetch_loaded&#125; -&gt;           <span class="comment">%% The Loaded info is cleared in</span></div><div class="line">        Loaded = State#state.loaded, <span class="comment">%% boot_loop but is handled here </span></div><div class="line">        From ! &#123;init,Loaded&#125;,        <span class="comment">%% anyway.</span></div><div class="line">        loop(State);</div><div class="line">    &#123;From, &#123;ensure_loaded, _&#125;&#125; -&gt;</div><div class="line">        From ! &#123;init, not_allowed&#125;,</div><div class="line">        loop(State);</div><div class="line">    Msg -&gt;</div><div class="line">        loop(handle_msg(Msg,State))</div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure></p>
+<h3 id="boot"><a href="#boot" class="headerlink" title="boot"></a>boot</h3><p>do_boot/2启动新进程进行引导逻辑。首先解释参数，比如-root，-loader，-path等。然后通过start_prim_loader/6启动主加载器进程erl_prim_loader，用来读取文件，也是第一个kernel级别（记录在init进程的#state.kernel）的进程。接着获取所使用的boot脚本文件，由-boot参数指定，默认$ROOT/bin/start.boot。eval_script/8执行boot文件一系列指令。如preLoaded，progress，path，primLoad，kernel_load_completed，kernelProcess（kernel级别进程）,apply等指令（具体可查看erl安装目录下的/usr/local/lib/erlang/bin/start.script）。</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div></pre></td><td class="code"><pre><div class="line"><span class="comment">%%% -------------------------------------------------</span></div><div class="line"><span class="comment">%%% The boot process fetches a boot script and loads</span></div><div class="line"><span class="comment">%%% all modules specified and starts spec. processes.</span></div><div class="line"><span class="comment">%%% Processes specified with -s or -run are finally started.</span></div><div class="line"><span class="comment">%%% -------------------------------------------------</span></div><div class="line"></div><div class="line"><span class="function"><span class="title">do_boot</span><span class="params">(Flags,Start)</span> -&gt;</span></div><div class="line">    Self = self(),</div><div class="line">    spawn_link(<span class="keyword">fun</span>() -&gt; do_boot(Self,Flags,Start) <span class="keyword">end</span>).</div><div class="line"></div><div class="line"><span class="function"><span class="title">do_boot</span><span class="params">(Init,Flags,Start)</span> -&gt;</span></div><div class="line">    process_flag(trap_exit,true),</div><div class="line">    &#123;Pgm0,Nodes,Id,Path&#125; = prim_load_flags(Flags),</div><div class="line">    Root = b2s(get_flag('-root',Flags)),</div><div class="line">    PathFls = path_flags(Flags),</div><div class="line">    Pgm = b2s(Pgm0),</div><div class="line">    _Pid = start_prim_loader(Init,b2a(Id),Pgm,bs2as(Nodes),</div><div class="line">                 bs2ss(Path),PathFls),</div><div class="line">    BootFile = bootfile(Flags,Root),</div><div class="line">    BootList = get_boot(BootFile,Root),</div><div class="line">    LoadMode = b2a(get_flag('-mode',Flags,false)),</div><div class="line">    Deb = b2a(get_flag('-init_debug',Flags,false)),</div><div class="line">    <span class="keyword">catch</span> ?ON_LOAD_HANDLER ! &#123;init_debug_flag,Deb&#125;,</div><div class="line">    BootVars = get_flag_args('-boot_var',Flags),</div><div class="line">    ParallelLoad =</div><div class="line">    (Pgm =:= <span class="string">"efile"</span>) <span class="keyword">and</span> (erlang:system_info(thread_pool_size) &gt; <span class="number">0</span>),</div><div class="line"></div><div class="line">    PathChoice = code_path_choice(),</div><div class="line">    eval_script(BootList,Init,PathFls,&#123;Root,BootVars&#125;,Path,</div><div class="line">        &#123;true,LoadMode,ParallelLoad&#125;,Deb,PathChoice),</div><div class="line"></div><div class="line">    <span class="comment">%% To help identifying Purify windows that pop up,</span></div><div class="line">    <span class="comment">%% print the node name into the Purify log.</span></div><div class="line">    (<span class="keyword">catch</span> erlang:system_info(&#123;purify, <span class="string">"Node: "</span> ++ atom_to_list(node())&#125;)),</div><div class="line"></div><div class="line">    start_em(Start).</div><div class="line"></div><div class="line"><span class="comment">%% Eval a boot script.</span></div><div class="line"><span class="comment">%% Load modules and start processes.</span></div><div class="line"><span class="comment">%% If a start command does not spawn a new process the</span></div><div class="line"><span class="comment">%% boot process hangs (we want to ensure syncronicity).</span></div><div class="line"><span class="comment">%%</span></div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">([&#123;progress,Info&#125;|CfgL],Init,PathFs,Vars,P,Ph,Deb,PathChoice)</span> -&gt;</span></div><div class="line">    debug(Deb,&#123;progress,Info&#125;),</div><div class="line">    init ! &#123;self(),progress,Info&#125;,</div><div class="line">    eval_script(CfgL,Init,PathFs,Vars,P,Ph,Deb,PathChoice);</div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">([&#123;preLoaded,_&#125;|CfgL],Init,PathFs,Vars,P,Ph,Deb,PathChoice)</span> -&gt;</span></div><div class="line">    eval_script(CfgL,Init,PathFs,Vars,P,Ph,Deb,PathChoice);</div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">([&#123;path,Path&#125;|CfgL],Init,&#123;Pa,Pz&#125;,Vars,false,Ph,Deb,PathChoice)</span> -&gt;</span></div><div class="line">    RealPath0 = make_path(Pa, Pz, Path, Vars),</div><div class="line">    RealPath = patch_path(RealPath0, PathChoice),</div><div class="line">    erl_prim_loader:set_path(RealPath),</div><div class="line">    eval_script(CfgL,Init,&#123;Pa,Pz&#125;,Vars,false,Ph,Deb,PathChoice);</div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">([&#123;path,_&#125;|CfgL],Init,PathFs,Vars,P,Ph,Deb,PathChoice)</span> -&gt;</span></div><div class="line">    <span class="comment">%% Ignore, use the command line -path flag.</span></div><div class="line">    eval_script(CfgL,Init,PathFs,Vars,P,Ph,Deb,PathChoice);</div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">([&#123;kernel_load_completed&#125;|CfgL],Init,PathFs,Vars,P,&#123;_,embedded,Par&#125;,Deb,PathChoice)</span> -&gt;</span></div><div class="line">    eval_script(CfgL,Init,PathFs,Vars,P,&#123;true,embedded,Par&#125;,Deb,PathChoice);</div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">([&#123;kernel_load_completed&#125;|CfgL],Init,PathFs,Vars,P,&#123;_,E,Par&#125;,Deb,PathChoice)</span> -&gt;</span></div><div class="line">    eval_script(CfgL,Init,PathFs,Vars,P,&#123;false,E,Par&#125;,Deb,PathChoice);</div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">([&#123;primLoad,Mods&#125;|CfgL],Init,PathFs,Vars,P,&#123;true,E,Par&#125;,Deb,PathChoice)</span></span></div><div class="line">  <span class="title">when</span> <span class="title">is_list</span><span class="params">(Mods)</span> -&gt;</div><div class="line">    <span class="keyword">if</span></div><div class="line">    Par =:= <span class="literal">true</span> -&gt;</div><div class="line">        par_load_modules(Mods,Init);</div><div class="line">    <span class="literal">true</span> -&gt;</div><div class="line">        load_modules(Mods)</div><div class="line">    <span class="keyword">end</span>,</div><div class="line">    eval_script(CfgL,Init,PathFs,Vars,P,&#123;true,E,Par&#125;,Deb,PathChoice);</div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">([&#123;primLoad,_Mods&#125;|CfgL],Init,PathFs,Vars,P,&#123;false,E,Par&#125;,Deb,PathChoice)</span> -&gt;</span></div><div class="line">    <span class="comment">%% Do not load now, code_server does that dynamically!</span></div><div class="line">    eval_script(CfgL,Init,PathFs,Vars,P,&#123;false,E,Par&#125;,Deb,PathChoice);</div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">([&#123;kernelProcess,Server,&#123;Mod,Fun,Args&#125;&#125;|CfgL],Init,</span></span></div><div class="line">        PathFs,Vars,P,Ph,Deb,PathChoice) -&gt;</div><div class="line">    debug(Deb,&#123;start,Server&#125;),</div><div class="line">    start_in_kernel(Server,Mod,Fun,Args,Init),</div><div class="line">    eval_script(CfgL,Init,PathFs,Vars,P,Ph,Deb,PathChoice);</div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">([&#123;apply,&#123;Mod,Fun,Args&#125;&#125;|CfgL],Init,PathFs,Vars,P,Ph,Deb,PathChoice)</span> -&gt;</span></div><div class="line">    debug(Deb,&#123;apply,&#123;Mod,Fun,Args&#125;&#125;),</div><div class="line">    apply(Mod,Fun,Args),</div><div class="line">    eval_script(CfgL,Init,PathFs,Vars,P,Ph,Deb,PathChoice);</div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">([],_,_,_,_,_,_,_)</span> -&gt;</span></div><div class="line">    ok;</div><div class="line"><span class="function"><span class="title">eval_script</span><span class="params">(What,_,_,_,_,_,_,_)</span> -&gt;</span></div><div class="line">    exit(&#123;'unexpected command in bootfile',What&#125;).</div></pre></td></tr></table></figure>
+<p>eval_script/8中的primLoad指令是加载模块，这里需要加载的模块记录在init进程的#state.loaded，同时如果失败的模块会记录在?ON_LOAD_HANDLER进程中。最后调用start_em/1来执行-s参数的MFA函数或者-eval参数的语名。至此do_boot/2运行完毕，进程结束，跟其link的init进程将收到{‘EXIT’, BootPid, normal}，然后init进到loop/1主循环中，init进程启动完毕。</p>
+<h3 id="start-boot"><a href="#start-boot" class="headerlink" title="start.boot"></a>start.boot</h3><p>start.boot对应的脚本为对应目录下的start.script，其内容如下：<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div></pre></td><td class="code"><pre><div class="line"><span class="comment">%% script generated at &#123;2017,1,6&#125; &#123;16,43,8&#125;</span></div><div class="line">&#123;script,</div><div class="line">    &#123;<span class="string">"OTP  APN 181 01"</span>,<span class="string">"R16B03-1"</span>&#125;,</div><div class="line">    [&#123;preLoaded,</div><div class="line">         [erl_prim_loader,erlang,erts_internal,init,otp_ring0,prim_eval,</div><div class="line">          prim_file,prim_inet,prim_zip,zlib]&#125;,</div><div class="line">     &#123;progress,preloaded&#125;,</div><div class="line">     &#123;path,[<span class="string">"$ROOT/lib/kernel/ebin"</span>,<span class="string">"$ROOT/lib/stdlib/ebin"</span>]&#125;,</div><div class="line">     &#123;primLoad,[error_handler]&#125;,</div><div class="line">     &#123;kernel_load_completed&#125;,</div><div class="line">     &#123;progress,kernel_load_completed&#125;,</div><div class="line">     &#123;path,[<span class="string">"$ROOT/lib/kernel/ebin"</span>]&#125;,</div><div class="line">     &#123;primLoad,</div><div class="line">         [application,application_controller,application_master,</div><div class="line">          application_starter,auth,code,code_server,disk_log,disk_log_1,</div><div class="line">          disk_log_server,disk_log_sup,dist_ac,dist_util,erl_boot_server,</div><div class="line">          erl_ddll,erl_distribution,erl_epmd,erl_reply,error_logger,</div><div class="line">          erts_debug,file,file_io_server,file_server,gen_sctp,gen_tcp,gen_udp,</div><div class="line">          global,global_group,global_search,group,heart,hipe_unified_loader,</div><div class="line">          inet,inet6_sctp,inet6_tcp,inet6_tcp_dist,inet6_udp,inet_config,</div><div class="line">          inet_db,inet_dns,inet_gethost_native,inet_hosts,inet_parse,inet_res,</div><div class="line">          inet_sctp,inet_tcp,inet_tcp_dist,inet_udp,kernel,kernel_config,net,</div><div class="line">          net_adm,net_kernel,os,pg2,ram_file,rpc,seq_trace,standard_error,</div><div class="line">          user,user_drv,user_sup,wrap_log_reader]&#125;,</div><div class="line">     &#123;path,[<span class="string">"$ROOT/lib/stdlib/ebin"</span>]&#125;,</div><div class="line">     &#123;primLoad,</div><div class="line">         [array,base64,beam_lib,binary,c,calendar,dets,dets_server,dets_sup,</div><div class="line">          dets_utils,dets_v8,dets_v9,dict,digraph,digraph_utils,edlin,</div><div class="line">          edlin_expand,epp,erl_bits,erl_compile,erl_eval,erl_expand_records,</div><div class="line">          erl_internal,erl_lint,erl_parse,erl_posix_msg,erl_pp,erl_scan,</div><div class="line">          erl_tar,error_logger_file_h,error_logger_tty_h,escript,ets,</div><div class="line">          eval_bits,file_sorter,filelib,filename,gb_sets,gb_trees,gen,</div><div class="line">          gen_event,gen_fsm,gen_server,io,io_lib,io_lib_format,io_lib_fread,</div><div class="line">          io_lib_pretty,lib,lists,log_mf_h,math,ms_transform,orddict,ordsets,</div><div class="line">          otp_internal,pg,pool,proc_lib,proplists,qlc,qlc_pt,queue,random,re,</div><div class="line">          sets,shell,shell_default,slave,sofs,string,supervisor,</div><div class="line">          supervisor_bridge,sys,timer,unicode,win32reg,zip]&#125;,</div><div class="line">     &#123;progress,modules_loaded&#125;,</div><div class="line">     &#123;path,[<span class="string">"$ROOT/lib/kernel/ebin"</span>,<span class="string">"$ROOT/lib/stdlib/ebin"</span>]&#125;,</div><div class="line">     &#123;kernelProcess,heart,&#123;heart,start,[]&#125;&#125;,</div><div class="line">     &#123;kernelProcess,error_logger,&#123;error_logger,start_link,[]&#125;&#125;,</div><div class="line">     &#123;kernelProcess,application_controller,</div><div class="line">         &#123;application_controller,start,</div><div class="line">             [&#123;application,kernel,</div><div class="line">                  [&#123;description,<span class="string">"ERTS  CXC 138 10"</span>&#125;,</div><div class="line">                   &#123;vsn,<span class="string">"2.16.4"</span>&#125;,</div><div class="line">                   &#123;id,[]&#125;,</div><div class="line">                   &#123;modules,</div><div class="line">                       [application,application_controller,application_master,</div><div class="line">                        application_starter,auth,code,code_server,dist_util,</div><div class="line">                        erl_boot_server,erl_distribution,erl_reply,</div><div class="line">                        error_handler,error_logger,file,file_server,</div><div class="line">                        file_io_server,global,global_group,global_search,</div><div class="line">                        group,heart,hipe_unified_loader,inet6_tcp,</div><div class="line">                        inet6_tcp_dist,inet6_udp,inet6_sctp,inet_config,</div><div class="line">                        inet_hosts,inet_gethost_native,inet_tcp_dist,kernel,</div><div class="line">                        kernel_config,net,net_adm,net_kernel,os,ram_file,rpc,</div><div class="line">                        user,user_drv,user_sup,disk_log,disk_log_1,</div><div class="line">                        disk_log_server,disk_log_sup,dist_ac,erl_ddll,</div><div class="line">                        erl_epmd,erts_debug,gen_tcp,gen_udp,gen_sctp,inet,</div><div class="line">                        inet_db,inet_dns,inet_parse,inet_res,inet_tcp,</div><div class="line">                        inet_udp,inet_sctp,pg2,seq_trace,standard_error,</div><div class="line">                        wrap_log_reader]&#125;,</div><div class="line">                   &#123;registered,</div><div class="line">                       [application_controller,erl_reply,auth,boot_server,</div><div class="line">                        code_server,disk_log_server,disk_log_sup,</div><div class="line">                        erl_prim_loader,error_logger,file_server_2,</div><div class="line">                        fixtable_server,global_group,global_name_server,heart,</div><div class="line">                        init,kernel_config,kernel_sup,net_kernel,net_sup,rex,</div><div class="line">                        user,os_server,ddll_server,erl_epmd,inet_db,pg2]&#125;,</div><div class="line">                   &#123;applications,[]&#125;,</div><div class="line">                   &#123;included_applications,[]&#125;,</div><div class="line">                   &#123;env,[&#123;error_logger,tty&#125;]&#125;,</div><div class="line">                   &#123;maxT,infinity&#125;,</div><div class="line">                   &#123;maxP,infinity&#125;,</div><div class="line">                   &#123;mod,&#123;kernel,[]&#125;&#125;]&#125;]&#125;&#125;,</div><div class="line">     &#123;progress,init_kernel_started&#125;,</div><div class="line">     &#123;apply,</div><div class="line">         &#123;application,load,</div><div class="line">             [&#123;application,stdlib,</div><div class="line">                  [&#123;description,<span class="string">"ERTS  CXC 138 10"</span>&#125;,</div><div class="line">                   &#123;vsn,<span class="string">"1.19.4"</span>&#125;,</div><div class="line">                   &#123;id,[]&#125;,</div><div class="line">                   &#123;modules,</div><div class="line">                       [array,base64,beam_lib,binary,c,calendar,dets,</div><div class="line">                        dets_server,dets_sup,dets_utils,dets_v8,dets_v9,dict,</div><div class="line">                        digraph,digraph_utils,edlin,edlin_expand,epp,</div><div class="line">                        eval_bits,erl_bits,erl_compile,erl_eval,</div><div class="line">                        erl_expand_records,erl_internal,erl_lint,erl_parse,</div><div class="line">                        erl_posix_msg,erl_pp,erl_scan,erl_tar,</div><div class="line">                        error_logger_file_h,error_logger_tty_h,escript,ets,</div><div class="line">                        file_sorter,filelib,filename,gb_trees,gb_sets,gen,</div><div class="line">                        gen_event,gen_fsm,gen_server,io,io_lib,io_lib_format,</div><div class="line">                        io_lib_fread,io_lib_pretty,lib,lists,log_mf_h,math,</div><div class="line">                        ms_transform,orddict,ordsets,otp_internal,pg,pool,</div><div class="line">                        proc_lib,proplists,qlc,qlc_pt,queue,random,re,sets,</div><div class="line">                        shell,shell_default,slave,sofs,string,supervisor,</div><div class="line">                        supervisor_bridge,sys,timer,unicode,win32reg,zip]&#125;,</div><div class="line">                   &#123;registered,</div><div class="line">                       [timer_server,rsh_starter,take_over_monitor,</div><div class="line">                        pool_master,dets]&#125;,</div><div class="line">                   &#123;applications,[kernel]&#125;,</div><div class="line">                   &#123;included_applications,[]&#125;,</div><div class="line">                   &#123;env,[]&#125;,</div><div class="line">                   &#123;maxT,infinity&#125;,</div><div class="line">                   &#123;maxP,infinity&#125;]&#125;]&#125;&#125;,</div><div class="line">     &#123;progress,applications_loaded&#125;,</div><div class="line">     &#123;apply,&#123;application,start_boot,[kernel,permanent]&#125;&#125;,</div><div class="line">     &#123;apply,&#123;application,start_boot,[stdlib,permanent]&#125;&#125;,</div><div class="line">     &#123;apply,&#123;c,erlangrc,[]&#125;&#125;,</div><div class="line">     &#123;progress,started&#125;]&#125;.</div></pre></td></tr></table></figure></p>
+<p>在boot脚本中会启动一些kernel级别的进程，其中包括heart，error_logger，applicatio_controller(启动的同时加载kernel的app配置)，然后加载stdlib的app配置，启动kernel，stdlib两个application，所以最小的Erlang系统只包含kernel和stdlib。</p>
+<h3 id="stop"><a href="#stop" class="headerlink" title="stop"></a>stop</h3><p>init:stop/0是通过给init进程发{stop,stop}消息来关闭init进程。首先clear_system/2关闭所有的Processes和Ports，然后通过do_stop/2来选择是restart、reboot还是stop。代码如下：<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div></pre></td><td class="code"><pre><div class="line"><span class="comment">%%% -------------------------------------------------</span></div><div class="line"><span class="comment">%%% Stop the system. </span></div><div class="line"><span class="comment">%%% Reason is: restart | reboot | stop</span></div><div class="line"><span class="comment">%%% According to reason terminate emulator or restart</span></div><div class="line"><span class="comment">%%% system using the same init process again.</span></div><div class="line"><span class="comment">%%% -------------------------------------------------</span></div><div class="line"></div><div class="line"><span class="function"><span class="title">stop</span><span class="params">(Reason,State)</span> -&gt;</span></div><div class="line">    BootPid = State#state.bootpid,</div><div class="line">    &#123;_,Progress&#125; = State#state.status,</div><div class="line">    State1 = State#state&#123;status = &#123;stopping, Progress&#125;&#125;,</div><div class="line">    clear_system(BootPid,State1),</div><div class="line">    do_stop(Reason,State1).</div><div class="line"></div><div class="line"><span class="function"><span class="title">do_stop</span><span class="params">(restart,#state&#123;start = Start, flags = Flags, args = Args&#125;)</span> -&gt;</span></div><div class="line">    boot(Start,Flags,Args);</div><div class="line"><span class="function"><span class="title">do_stop</span><span class="params">(reboot,_)</span> -&gt;</span></div><div class="line">    halt();</div><div class="line"><span class="function"><span class="title">do_stop</span><span class="params">(stop,State)</span> -&gt;</span></div><div class="line">    stop_heart(State),</div><div class="line">    halt();</div><div class="line"><span class="function"><span class="title">do_stop</span><span class="params">(&#123;stop,Status&#125;,State)</span> -&gt;</span> </div><div class="line">    stop_heart(State),</div><div class="line">    halt(Status).</div><div class="line"></div><div class="line"><span class="function"><span class="title">clear_system</span><span class="params">(BootPid,State)</span> -&gt;</span></div><div class="line">    Heart = get_heart(State#state.kernel),</div><div class="line">    shutdown_pids(Heart,BootPid,State),</div><div class="line">    unload(Heart).</div><div class="line"></div><div class="line"><span class="function"><span class="title">shutdown_pids</span><span class="params">(Heart,BootPid,State)</span> -&gt;</span></div><div class="line">    Timer = shutdown_timer(State#state.flags),</div><div class="line">    <span class="keyword">catch</span> shutdown(State#state.kernel,BootPid,Timer,State),</div><div class="line">    kill_all_pids(Heart), <span class="comment">% Even the shutdown timer.</span></div><div class="line">    kill_all_ports(Heart),</div><div class="line">    flush_timout(Timer).</div><div class="line"></div><div class="line"><span class="function"><span class="title">shutdown</span><span class="params">([&#123;heart,_Pid&#125;|Kernel],BootPid,Timer,State)</span> -&gt;</span></div><div class="line">    shutdown(Kernel, BootPid, Timer, State);</div><div class="line"><span class="function"><span class="title">shutdown</span><span class="params">([&#123;_Name,Pid&#125;|Kernel],BootPid,Timer,State)</span> -&gt;</span></div><div class="line">    shutdown_kernel_pid(Pid, BootPid, Timer, State),</div><div class="line">    shutdown(Kernel,BootPid,Timer,State);</div><div class="line"><span class="function"><span class="title">shutdown</span><span class="params">(_,_,_,_)</span> -&gt;</span></div><div class="line">    <span class="literal">true</span>.</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment">%%</span></div><div class="line"><span class="comment">%% A kernel pid must handle the special case message</span></div><div class="line"><span class="comment">%% &#123;'EXIT',Parent,Reason&#125; and terminate upon it!</span></div><div class="line"><span class="comment">%%</span></div><div class="line"><span class="function"><span class="title">shutdown_kernel_pid</span><span class="params">(Pid, BootPid, Timer, State)</span> -&gt;</span></div><div class="line">    Pid ! &#123;'EXIT',BootPid,shutdown&#125;,</div><div class="line">    shutdown_loop(Pid, Timer, State, []).</div><div class="line"></div><div class="line"><span class="comment">%%</span></div><div class="line"><span class="comment">%% We have to handle init requests here in case a process</span></div><div class="line"><span class="comment">%% performs such a request and cannot shutdown (deadlock).</span></div><div class="line"><span class="comment">%% Keep all other EXIT messages in case it was another</span></div><div class="line"><span class="comment">%% kernel process. Resend these messages and handle later.</span></div><div class="line"><span class="comment">%%</span></div><div class="line"><span class="function"><span class="title">shutdown_loop</span><span class="params">(Pid,Timer,State,Exits)</span> -&gt;</span></div><div class="line">    <span class="keyword">receive</span></div><div class="line">    &#123;'EXIT',Pid,_&#125; -&gt;</div><div class="line">        resend(reverse(Exits)),</div><div class="line">        ok;</div><div class="line">    &#123;Timer,timeout&#125; -&gt;</div><div class="line">        erlang:display(&#123;init,shutdown_timeout&#125;),</div><div class="line">        throw(timeout);</div><div class="line">    &#123;stop,_&#125; -&gt;</div><div class="line">        shutdown_loop(Pid,Timer,State,Exits);</div><div class="line">    &#123;From,fetch_loaded&#125; -&gt;</div><div class="line">        From ! &#123;init,State#state.loaded&#125;,</div><div class="line">        shutdown_loop(Pid,Timer,State,Exits);</div><div class="line">    &#123;'EXIT',OtherP,Reason&#125; -&gt;</div><div class="line">        shutdown_loop(Pid,Timer,State,</div><div class="line">              [&#123;'EXIT',OtherP,Reason&#125;|Exits]);</div><div class="line">    Msg -&gt;</div><div class="line">        State1 = handle_msg(Msg,State),</div><div class="line">        shutdown_loop(Pid,Timer,State1,Exits)</div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure></p>
+<p>clear_system/2首先关闭记录在#state.kernel中的进程，shutdown/4中发送{‘EXIT’, BootPid, shutdown}消息来关闭kernel进程。此时是同步关闭的，init进程发送消息后，进入shutdown_loop/4通过receive等待kernel进程退出的消息。这个时候init还需要处理其他消息，如果是{‘EXIT’, OtherPid, Reason}消息则需要记录，等这个kernel进程关闭后，重新发给init自己，因为这里的receive会把之前收到的消息从消息队列中移除。#state.kernel中的进程全部关闭完后，关闭系统中除heart和init本身的所有进程，通过发送{‘EXIT’, Pid, kill}消息的方式，然后是关闭所有的port。最后通过unload/1释放所有已加载的模块（不包含预加载的模块，因为有可能restart init）。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line"><span class="comment">%% Kill all existing pids in the system (except init and heart).</span></div><div class="line"><span class="function"><span class="title">kill_all_pids</span><span class="params">(Heart)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> get_pids(Heart) <span class="keyword">of</span></div><div class="line">    [] -&gt;</div><div class="line">        ok;</div><div class="line">    Pids -&gt;</div><div class="line">        kill_em(Pids),</div><div class="line">        kill_all_pids(Heart)  <span class="comment">% Continue until all are really killed.</span></div><div class="line">    <span class="keyword">end</span>.</div><div class="line">    </div><div class="line"><span class="comment">%% All except zombies.</span></div><div class="line"><span class="function"><span class="title">alive_processes</span><span class="params">()</span> -&gt;</span></div><div class="line">    [P || P &lt;- processes(), erlang:is_process_alive(P)].</div><div class="line"></div><div class="line"><span class="function"><span class="title">get_pids</span><span class="params">(Heart)</span> -&gt;</span></div><div class="line">    Pids = alive_processes(),</div><div class="line">    delete(Heart,self(),Pids).</div><div class="line"></div><div class="line"><span class="function"><span class="title">delete</span><span class="params">(Heart,Init,[Heart|Pids])</span> -&gt;</span> delete(Heart,Init,Pids);</div><div class="line"><span class="function"><span class="title">delete</span><span class="params">(Heart,Init,[Init|Pids])</span>  -&gt;</span> delete(Heart,Init,Pids);</div><div class="line"><span class="function"><span class="title">delete</span><span class="params">(Heart,Init,[Pid|Pids])</span>   -&gt;</span> [Pid|delete(Heart,Init,Pids)];</div><div class="line"><span class="function"><span class="title">delete</span><span class="params">(_,_,[])</span>                  -&gt;</span> [].</div><div class="line"></div><div class="line"><span class="function"><span class="title">kill_em</span><span class="params">([Pid|Pids])</span> -&gt;</span></div><div class="line">    exit(Pid,kill),</div><div class="line">    kill_em(Pids);</div><div class="line"><span class="function"><span class="title">kill_em</span><span class="params">([])</span> -&gt;</span></div><div class="line">    ok.</div><div class="line"></div><div class="line"><span class="comment">%%</span></div><div class="line"><span class="comment">%% Kill all existing ports in the system (except the heart port),</span></div><div class="line"><span class="comment">%% i.e. ports still existing after all processes have been killed.</span></div><div class="line"><span class="comment">%%</span></div><div class="line"><span class="comment">%% System ports like the async driver port will nowadays be immortal;</span></div><div class="line"><span class="comment">%% therefore, it is ok to send them exit signals...</span></div><div class="line"><span class="comment">%%</span></div><div class="line"><span class="function"><span class="title">kill_all_ports</span><span class="params">(Heart)</span> -&gt;</span></div><div class="line">    kill_all_ports(Heart,erlang:ports()).</div><div class="line"></div><div class="line"><span class="function"><span class="title">kill_all_ports</span><span class="params">(Heart,[P|Ps])</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> erlang:port_info(P,connected) <span class="keyword">of</span></div><div class="line">    &#123;connected,Heart&#125; -&gt;</div><div class="line">        kill_all_ports(Heart,Ps);</div><div class="line">    _ -&gt;</div><div class="line">        exit(P,kill),</div><div class="line">        kill_all_ports(Heart,Ps)</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">kill_all_ports</span><span class="params">(_,_)</span> -&gt;</span></div><div class="line">    ok.</div><div class="line"></div><div class="line"><span class="function"><span class="title">unload</span><span class="params">(false)</span> -&gt;</span></div><div class="line">    do_unload(sub(erlang:pre_loaded(),erlang:loaded()));</div><div class="line"><span class="function"><span class="title">unload</span><span class="params">(_)</span> -&gt;</span></div><div class="line">    do_unload(sub([heart|erlang:pre_loaded()],erlang:loaded())).</div><div class="line"></div><div class="line"><span class="function"><span class="title">do_unload</span><span class="params">([M|Mods])</span> -&gt;</span></div><div class="line">    <span class="keyword">catch</span> erlang:purge_module(M),</div><div class="line">    <span class="keyword">catch</span> erlang:delete_module(M),</div><div class="line">    <span class="keyword">catch</span> erlang:purge_module(M),</div><div class="line">    do_unload(Mods);</div><div class="line"><span class="function"><span class="title">do_unload</span><span class="params">([])</span> -&gt;</span></div><div class="line">    purge_all_hipe_refs(),</div><div class="line">    ok.</div><div class="line"></div><div class="line"><span class="function"><span class="title">purge_all_hipe_refs</span><span class="params">()</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> erlang:system_info(hipe_architecture) <span class="keyword">of</span></div><div class="line">    undefined -&gt; ok;</div><div class="line">    _ -&gt; hipe_bifs:remove_refs_from(all)</div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>&emsp;&emsp;Erlang启动由erl开始通过execerl加载BEAM虚拟机，然后创建init进程来进行一系列的引导逻辑。kernel和stdlib application是Erlang虚拟机最小组成部分。Erlang进程分为kernel级别进程，记录在init的#state.kernel中，关闭消息的Reason为shutdown，其他普通进程为kill。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://www.cnblogs.com/zhengsyao/archive/2012/08/15/Erlang-otp_start_up.html" target="_blank" rel="external">Erlang启动过程分析</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Erlang/" rel="tag"># Erlang</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/正则表达式/" rel="prev" title="正则表达式">
+                正则表达式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="毛毛大人" />
+          <p class="site-author-name" itemprop="name">毛毛大人</p>
+           
+              <p class="site-description motion-element" itemprop="description">学无止境</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#init"><span class="nav-number">2.</span> <span class="nav-text">init</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#boot"><span class="nav-number">3.</span> <span class="nav-text">boot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-boot"><span class="nav-number">4.</span> <span class="nav-text">start.boot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stop"><span class="nav-number">5.</span> <span class="nav-text">stop</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">毛毛大人</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
