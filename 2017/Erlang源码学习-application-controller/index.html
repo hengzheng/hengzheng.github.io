@@ -1,0 +1,736 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Erlang," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="简介&amp;emsp;&amp;emsp;Erlang源码学习环境为linux平台，Erlang/OTP代码版本是R16B03-1。本文主要学习application_controller的启动和结束过程相关代码。application表示一个实现了某些特定功能的组件，它可以作为单元来启动和关闭，也可以很好地被其他系统重用。application_controller为application提交相关接口，管理a">
+<meta name="keywords" content="Erlang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Erlang源码学习--application_controller">
+<meta property="og:url" content="https://hengzheng.github.io/2017/Erlang源码学习-application-controller/index.html">
+<meta property="og:site_name" content="充电桩">
+<meta property="og:description" content="简介&amp;emsp;&amp;emsp;Erlang源码学习环境为linux平台，Erlang/OTP代码版本是R16B03-1。本文主要学习application_controller的启动和结束过程相关代码。application表示一个实现了某些特定功能的组件，它可以作为单元来启动和关闭，也可以很好地被其他系统重用。application_controller为application提交相关接口，管理a">
+<meta property="og:updated_time" content="2017-06-01T09:00:42.718Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Erlang源码学习--application_controller">
+<meta name="twitter:description" content="简介&amp;emsp;&amp;emsp;Erlang源码学习环境为linux平台，Erlang/OTP代码版本是R16B03-1。本文主要学习application_controller的启动和结束过程相关代码。application表示一个实现了某些特定功能的组件，它可以作为单元来启动和关闭，也可以很好地被其他系统重用。application_controller为application提交相关接口，管理a">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hengzheng.github.io/2017/Erlang源码学习-application-controller/"/>
+
+
+
+
+
+  <title> Erlang源码学习--application_controller | 充电桩 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">充电桩</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-application-controller/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Erlang源码学习--application_controller
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-31T10:27:45+08:00">
+                2017-05-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Erlang/" itemprop="url" rel="index">
+                    <span itemprop="name">Erlang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;Erlang源码学习环境为linux平台，Erlang/OTP代码版本是R16B03-1。本文主要学习application_controller的启动和结束过程相关代码。application表示一个实现了某些特定功能的组件，它可以作为单元来启动和关闭，也可以很好地被其他系统重用。application_controller为application提交相关接口，管理application，是在Erlang虚拟机启动时就启动的kernel进程。application_controller只管理local application，如果是distributed applications则由另一个叫dist_ac的进程管理。</p>
+<a id="more"></a>
+<h3 id="start-1"><a href="#start-1" class="headerlink" title="start/1"></a>start/1</h3><p>启动application_controller进程，参数是kernel application的配置数据。这里的配置数据只能是kernel application，因为kernel启动user进程（特殊之处在于user是application_controller进程的group_leader）。此进程由erlang虚拟机第一个进程init的do_load/3函数启动，所以其Parent PID是init。这里新创建了个进程执行init/2函数，然后通过receive来等待应答。init/2中首先注册进程为application_controller，check_config/0检测启动Erlang虚拟机时由-config参数传递的config文件，如果是sys.config文件，可以包含其他的.config文件。check_config_data/1检查.config文件相关配置内容。然后创建名为ac_tab的ets表，这里注释提到可以不再需要ac_tab表了，因为现在确保了在application启动时可以call application_controller进程来获取信息，而不一定要通过ac_tab表。make_appl/1分析和检查application配置，load/2加载application配置数据，同时加载配置中included_applications中包含的application配置数据，在ac_tab表中插入已加载application的#appl{}数据。load/2中传递了#state{}，源码这里实质上并没有改变状态。application配置数据加载成功后，给init进程发送ack应答消息，进入到gen_server主循环(所以application_controller也是gen_server行为的进程)，这时application_controller就启动完毕了。application_controller启动的同时加载了kernel的配置，同时加载了included_applications包含的其他application配置，但是也只是加载了配置，相关的application并没有启动。</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">start</span><span class="params">(KernelApp)</span> -&gt;</span></div><div class="line">    <span class="comment">%% OTP-5811 Don't start as a gen_server to prevent crash report</span></div><div class="line">    <span class="comment">%% when (if) the process terminates</span></div><div class="line">    Init = self(),</div><div class="line">    AC = spawn_link(<span class="keyword">fun</span>() -&gt; init(Init, KernelApp) <span class="keyword">end</span>),</div><div class="line">    <span class="keyword">receive</span></div><div class="line">    &#123;ack, AC, ok&#125; -&gt;</div><div class="line">        &#123;ok, AC&#125;; </div><div class="line">    &#123;ack, AC, &#123;error, Reason&#125;&#125; -&gt;</div><div class="line">        to_string(Reason); <span class="comment">% init doesn't want error tuple, only a reason</span></div><div class="line">    &#123;'EXIT', _Pid, Reason&#125; -&gt;</div><div class="line">        to_string(Reason)</div><div class="line">    <span class="keyword">end</span>. </div><div class="line"></div><div class="line"><span class="function"><span class="title">init</span><span class="params">(Init, Kernel)</span> -&gt;</span></div><div class="line">    register(?AC, self()),</div><div class="line">    process_flag(trap_exit, true),</div><div class="line">    put('$ancestors', [Init]), <span class="comment">% OTP-5811, for gen_server compatibility</span></div><div class="line">    put('$initial_call', &#123;application_controller, start, <span class="number">1</span>&#125;),</div><div class="line"></div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> check_conf() <span class="keyword">of</span></div><div class="line">    &#123;ok, ConfData&#125; -&gt;</div><div class="line">        <span class="comment">%% Actually, we don't need this info in an ets table anymore.</span></div><div class="line">        <span class="comment">%% This table was introduced because starting applications</span></div><div class="line">        <span class="comment">%% should be able to get som info from AC (e.g. loaded_apps).</span></div><div class="line">        <span class="comment">%% The new implementation makes sure the AC process can be</span></div><div class="line">        <span class="comment">%% called during start-up of any app.</span></div><div class="line">        <span class="keyword">case</span> check_conf_data(ConfData) <span class="keyword">of</span></div><div class="line">        ok -&gt;</div><div class="line">            ets:new(ac_tab, [set, public, named_table]),</div><div class="line">            S = #state&#123;conf_data = ConfData&#125;,</div><div class="line">            &#123;ok, KAppl&#125; = make_appl(Kernel),</div><div class="line">            <span class="keyword">case</span> <span class="keyword">catch</span> load(S, KAppl) <span class="keyword">of</span></div><div class="line">            &#123;'EXIT', LoadError&#125; -&gt;</div><div class="line">                Reason = &#123;'load error', LoadError&#125;,</div><div class="line">                Init ! &#123;ack, self(), &#123;error, to_string(Reason)&#125;&#125;;</div><div class="line">                        &#123;error, Error&#125; -&gt;</div><div class="line">                            Init ! &#123;ack, self(), &#123;error, to_string(Error)&#125;&#125;;</div><div class="line">            &#123;ok, NewS&#125; -&gt;</div><div class="line">                Init ! &#123;ack, self(), ok&#125;,</div><div class="line">                gen_server:enter_loop(?MODULE, [], NewS,</div><div class="line">                          &#123;local, ?AC&#125;)</div><div class="line">            <span class="keyword">end</span>;</div><div class="line">        &#123;error, ErrorStr&#125; -&gt;</div><div class="line">            Str = lists:flatten(io_lib:format(<span class="string">"invalid config data: ~ts"</span>, [ErrorStr])),</div><div class="line">            Init ! &#123;ack, self(), &#123;error, to_string(Str)&#125;&#125;</div><div class="line">        <span class="keyword">end</span>;</div><div class="line">    &#123;error, &#123;File, Line, Str&#125;&#125; -&gt;</div><div class="line">        ReasonStr =</div><div class="line">        lists:flatten(io_lib:format(<span class="string">"error in config file "</span></div><div class="line">                        <span class="string">"~tp (~w): ~ts"</span>,</div><div class="line">                        [File, Line, Str])),</div><div class="line">        Init ! &#123;ack, self(), &#123;error, to_string(ReasonStr)&#125;&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="comment">%% application_controller的state</span></div><div class="line"><span class="keyword">-record</span><span class="params">(state, &#123;loading = [], starting = [], start_p_false = [], running = [],</span></div><div class="line">        control = [], started = [], start_req = [], conf_data&#125;).</div><div class="line"></div><div class="line"><span class="comment">%% application配置的数据</span></div><div class="line"><span class="keyword">-record</span><span class="params">(appl_data, &#123;name, regs = [], phases, mod, mods = [],</span></div><div class="line">                    inc_apps, maxP = infinity, maxT = infinity&#125;).</div><div class="line"></div><div class="line"><span class="comment">%% application数据</span></div><div class="line"><span class="keyword">-record</span><span class="params">(appl, &#123;name, appl_data = #appl_data&#123;&#125;, descr, id, vsn, restart_type, inc_apps, apps&#125;)</span>.</div></pre></td></tr></table></figure>
+<h3 id="terminate-2"><a href="#terminate-2" class="headerlink" title="terminate/2"></a>terminate/2</h3><p>application_controller是gen_server行为的进程，所以结束时执行的是terminate/2。首先如果设置了kernel application的shutdown_func的回调函数话，则先回调。然后取出kernel application设置的shutdown_timeout超时时间，默认为infinity。接着关闭记录在#state.running中的application_master进程，先发送{‘EXIT’, ACPid, shutdown}，如果超时了则发送{‘EXIT’, ACPid, kill}消息。最后删除名ac_tab的ets表。</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">terminate</span><span class="params">(Reason, S)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> application:get_env(kernel, shutdown_func) <span class="keyword">of</span></div><div class="line">    &#123;ok, &#123;M, F&#125;&#125; -&gt;</div><div class="line">        <span class="keyword">catch</span> M:F(Reason);</div><div class="line">    _ -&gt;                         </div><div class="line">        ok    </div><div class="line">    <span class="keyword">end</span>,  </div><div class="line">    ShutdownTimeout =  </div><div class="line">    <span class="keyword">case</span> application:get_env(kernel, shutdown_timeout) <span class="keyword">of</span></div><div class="line">        undefined -&gt; infinity;</div><div class="line">        &#123;ok,T&#125; -&gt; T</div><div class="line">    <span class="keyword">end</span>,</div><div class="line">    foreach(<span class="keyword">fun</span>(&#123;_AppName, Id&#125;) <span class="keyword">when</span> is_pid(Id) -&gt;</div><div class="line">            Ref = erlang:monitor(process, Id),</div><div class="line">            unlink(Id),</div><div class="line">            exit(Id, shutdown),</div><div class="line">            <span class="keyword">receive</span></div><div class="line">            <span class="comment">%% Proc died before link</span></div><div class="line">            &#123;'EXIT', Id, _&#125; -&gt; ok</div><div class="line">            <span class="keyword">after</span> <span class="number">0</span> -&gt;</div><div class="line">                <span class="keyword">receive</span></div><div class="line">                &#123;'DOWN', Ref, process, Id, _&#125; -&gt; ok</div><div class="line">                <span class="keyword">after</span> ShutdownTimeout -&gt;</div><div class="line">                    exit(Id, kill),</div><div class="line">                    <span class="keyword">receive</span></div><div class="line">                    &#123;'DOWN', Ref, process, Id, _&#125; -&gt; ok</div><div class="line">                    <span class="keyword">end</span></div><div class="line">                <span class="keyword">end</span></div><div class="line">            <span class="keyword">end</span>;</div><div class="line">           (_) -&gt; ok</div><div class="line">        <span class="keyword">end</span>,</div><div class="line">        S#state.running),</div><div class="line">    <span class="literal">true</span> = ets:delete(ac_tab),</div><div class="line">    ok.</div></pre></td></tr></table></figure>
+<h3 id="load-application-1，unload-application-1"><a href="#load-application-1，unload-application-1" class="headerlink" title="load_application/1，unload_application/1"></a>load_application/1，unload_application/1</h3><p>加载和卸载application配置数据。加载的参数可以application名字，也可以是直接配置数据格式 ，如果是application名字，则先在code:get_path()路径下查找applicationName.app文件。do_load_application/2函数首先检测是否加载过，然后make_appl/1分析和检查application配置，load/2加载application配置数据，同时加载配置中included_applications中包含的application配置数据，在ac_tab表中插入已加载application的#appl{}数据。卸载的参数是application名字，首先检查application是否还在运行中，运行中不允许卸载，然后检查是否加载过。unload/2删除application相关的环境变量配置，删除ac_tab表中的相关数据，同时卸载included_applications中包含的application。</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">load_application</span><span class="params">(Application)</span> -&gt;</span></div><div class="line">    gen_server:call(?AC, &#123;load_application, Application&#125;, infinity).</div><div class="line">    </div><div class="line"><span class="function"><span class="title">unload_application</span><span class="params">(AppName)</span> -&gt;</span></div><div class="line">    gen_server:call(?AC, &#123;unload_application, AppName&#125;, infinity).</div><div class="line"></div><div class="line"><span class="comment">%% 加载数据</span></div><div class="line"><span class="function"><span class="title">handle_call</span><span class="params">(&#123;load_application, Application&#125;, From, S)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> do_load_application(Application, S) <span class="keyword">of</span></div><div class="line">    &#123;ok, NewS&#125; -&gt;</div><div class="line">        AppName = get_appl_name(Application),</div><div class="line">        <span class="keyword">case</span> cntrl(AppName, S, &#123;ac_load_application_req, AppName&#125;) <span class="keyword">of</span></div><div class="line">        <span class="literal">true</span> -&gt;</div><div class="line">            &#123;noreply, S#state&#123;loading = [&#123;AppName, From&#125; |</div><div class="line">                         S#state.loading]&#125;&#125;;</div><div class="line">        <span class="literal">false</span> -&gt;</div><div class="line">            &#123;reply, ok, NewS&#125;</div><div class="line">        <span class="keyword">end</span>;</div><div class="line">    &#123;error, _&#125; = Error -&gt;</div><div class="line">        &#123;reply, Error, S&#125;;</div><div class="line">    &#123;'EXIT', R&#125; -&gt;</div><div class="line">        &#123;reply, &#123;error, R&#125;, S&#125;</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">do_load_application</span><span class="params">(Application, S)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> get_loaded(Application) <span class="keyword">of</span></div><div class="line">    &#123;true, _&#125; -&gt;  </div><div class="line">        throw(&#123;error, &#123;already_loaded, Application&#125;&#125;);</div><div class="line">    <span class="literal">false</span> -&gt;  </div><div class="line">        <span class="keyword">case</span> make_appl(Application) <span class="keyword">of</span></div><div class="line">        &#123;ok, Appl&#125; -&gt; load(S, Appl);</div><div class="line">        Error -&gt; Error</div><div class="line">        <span class="keyword">end</span></div><div class="line">    <span class="keyword">end</span>. </div><div class="line"><span class="function"><span class="title">load</span><span class="params">(S, &#123;ApplData, ApplEnv, IncApps, Descr, Id, Vsn, Apps&#125;)</span> -&gt;</span></div><div class="line">    Name = ApplData#appl_data.name,</div><div class="line">    ConfEnv = get_env_i(Name, S),</div><div class="line">    NewEnv = merge_app_env(ApplEnv, ConfEnv),</div><div class="line">    CmdLineEnv = get_cmd_env(Name),</div><div class="line">    NewEnv2 = merge_app_env(NewEnv, CmdLineEnv),</div><div class="line">    NewEnv3 = keyreplaceadd(included_applications, <span class="number">1</span>, NewEnv2,</div><div class="line">                &#123;included_applications, IncApps&#125;),</div><div class="line">    add_env(Name, NewEnv3),</div><div class="line">    Appl = #appl&#123;name = Name, descr = Descr, id = Id, vsn = Vsn,</div><div class="line">         appl_data = ApplData, inc_apps = IncApps, apps = Apps&#125;,</div><div class="line">    ets:insert(ac_tab, &#123;&#123;loaded, Name&#125;, Appl&#125;),</div><div class="line">    NewS =</div><div class="line">    foldl(<span class="keyword">fun</span>(App, S1) -&gt;</div><div class="line">              <span class="keyword">case</span> get_loaded(App) <span class="keyword">of</span></div><div class="line">              &#123;true, _&#125; -&gt; S1;</div><div class="line">              <span class="literal">false</span> -&gt;</div><div class="line">                  <span class="keyword">case</span> do_load_application(App, S1) <span class="keyword">of</span></div><div class="line">                  &#123;ok, S2&#125; -&gt; S2;</div><div class="line">                  Error -&gt; throw(Error)</div><div class="line">                  <span class="keyword">end</span></div><div class="line">              <span class="keyword">end</span></div><div class="line">          <span class="keyword">end</span>, S, IncApps),</div><div class="line">    &#123;ok, NewS&#125;.</div><div class="line"></div><div class="line"><span class="comment">%% 卸载数据</span></div><div class="line"><span class="function"><span class="title">handle_call</span><span class="params">(&#123;unload_application, AppName&#125;, _From, S)</span> -&gt;</span> </div><div class="line">    <span class="keyword">case</span> lists:keymember(AppName, <span class="number">1</span>, S#state.running) <span class="keyword">of</span> </div><div class="line">    <span class="literal">true</span> -&gt; &#123;reply, &#123;error, &#123;running, AppName&#125;&#125;, S&#125;; </div><div class="line">    <span class="literal">false</span> -&gt; </div><div class="line">        <span class="keyword">case</span> get_loaded(AppName) <span class="keyword">of</span> </div><div class="line">        &#123;true, _&#125; -&gt; </div><div class="line">            NewS = unload(AppName, S), </div><div class="line">            cntrl(AppName, S, &#123;ac_application_unloaded, AppName&#125;), </div><div class="line">            &#123;reply, ok, NewS&#125;; </div><div class="line">        <span class="literal">false</span> -&gt; </div><div class="line">            &#123;reply, &#123;error, &#123;not_loaded, AppName&#125;&#125;, S&#125; </div><div class="line">        <span class="keyword">end</span> </div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">unload</span><span class="params">(AppName, S)</span> -&gt;</span></div><div class="line">    &#123;ok, IncApps&#125; = get_env(AppName, included_applications),</div><div class="line">    del_env(AppName),</div><div class="line">    ets:delete(ac_tab, &#123;loaded, AppName&#125;),</div><div class="line">    foldl(<span class="keyword">fun</span>(App, S1) -&gt;</div><div class="line">          <span class="keyword">case</span> get_loaded(App) <span class="keyword">of</span></div><div class="line">              <span class="literal">false</span> -&gt; S1;</div><div class="line">              &#123;true, _&#125; -&gt; unload(App, S1)</div><div class="line">          <span class="keyword">end</span> </div><div class="line">      <span class="keyword">end</span>, S, IncApps).</div></pre></td></tr></table></figure>
+<h3 id="start-application-2"><a href="#start-application-2" class="headerlink" title="start_application/2"></a>start_application/2</h3><p>开启application_master进程。RestartType指明当application出错关闭时要做些什么，有三种类型分别是permanent、transient、temporary。permanent类型的application出错关闭时，所有其他的application也会关闭，然后application_controller也关闭，kernel和stdlib就是这种类型的；transient类型的application normal关闭时，不会影响其他的application，如果是非正常出错关闭的，则行为跟permanent一样；temporary类型的application出错关闭时，不会影响其他的application。如果是调用application_controller:stop/1关闭的，不受RestartType影响，也即是不会影响其他的application。<br>application_controller收到start_application消息，首先在请求列表（记录在#state.start_req）中检查是否有相同的请求，check_start_cond/4检查启动类型，是否已在运行中(记录在#state.running)和检查配置数据中applications字段指明的apps是否已启动(记录在#state.started)。检查是否有权限运行，然后通过swap_starter/4启动master进程，同时记录在#state.starting和#state.start_req中。swap_starter/4创建新的进程来执行init_starter/4，init_starter/4把start_appl/3运行结果通过gen_server:cast/1反馈给application_controller进程。start_appl/3检查配置数据中applications字段指明的apps是否已运行(记录在#state.running中)，然后调用application_master:start_link/2启动master，返回master的pid。<br>application_controller进程收到application_started消息后，首先给请求启动application的进程(记录在#state.start_req中)回馈结果，并从队列中删除。如果启动的是kernel application则check_user/0检查user进程，然后设置application_controller进程的group_leader为user。在#state.running和#state.started中记录，同时删除#state.starting中的信息，更新state。代码中也可以看到如果启动类型是permanent或者transient且失败原因是非normal的，则application_controller会关闭。</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">start_application</span><span class="params">(AppName, RestartType)</span> -&gt;</span></div><div class="line">    gen_server:call(?AC, &#123;start_application, AppName, RestartType&#125;, infinity).</div><div class="line"><span class="function"><span class="title">handle_call</span><span class="params">(&#123;start_application, AppName, RestartType&#125;, From, S)</span> -&gt;</span></div><div class="line">    #state&#123;running = Running, starting = Starting, start_p_false = SPF,</div><div class="line">       started = Started, start_req = Start_req&#125; = S,</div><div class="line">    <span class="comment">%% Check if the commandline environment variables are OK.</span></div><div class="line">    <span class="comment">%% Incase of erroneous variables do not start the application,</span></div><div class="line">    <span class="comment">%% if the application is permanent crash the node.</span></div><div class="line">    <span class="comment">%% Check if the application is already starting.</span></div><div class="line">    <span class="keyword">case</span> lists:keyfind(AppName, <span class="number">1</span>, Start_req) <span class="keyword">of</span></div><div class="line">    <span class="literal">false</span> -&gt;</div><div class="line">        <span class="keyword">case</span> <span class="keyword">catch</span> check_start_cond(AppName, RestartType, Started, Running) <span class="keyword">of</span></div><div class="line">        &#123;ok, Appl&#125; -&gt;</div><div class="line">            Cntrl = cntrl(AppName, S, &#123;ac_start_application_req, AppName&#125;),</div><div class="line">            Perm = application:get_env(kernel, permissions),</div><div class="line">            <span class="keyword">case</span> &#123;Cntrl, Perm&#125; <span class="keyword">of</span></div><div class="line">            &#123;true, _&#125; -&gt;</div><div class="line">                &#123;noreply, S#state&#123;starting = [&#123;AppName, RestartType, normal, From&#125; |</div><div class="line">                              Starting],</div><div class="line">                          start_req = [&#123;AppName, From&#125; | Start_req]&#125;&#125;;</div><div class="line">            &#123;false, undefined&#125; -&gt;</div><div class="line">                spawn_starter(From, Appl, S, normal),</div><div class="line">                &#123;noreply, S#state&#123;starting = [&#123;AppName, RestartType, normal, From&#125; |</div><div class="line">                              Starting],</div><div class="line">                          start_req = [&#123;AppName, From&#125; | Start_req]&#125;&#125;;</div><div class="line">            &#123;false, &#123;ok, Perms&#125;&#125; -&gt;</div><div class="line">                <span class="keyword">case</span> lists:member(&#123;AppName, false&#125;, Perms) <span class="keyword">of</span></div><div class="line">                <span class="literal">false</span> -&gt;</div><div class="line">                    spawn_starter(From, Appl, S, normal),</div><div class="line">                    &#123;noreply, S#state&#123;starting = [&#123;AppName, RestartType, normal, From&#125; |</div><div class="line">                                  Starting],</div><div class="line">                              start_req = [&#123;AppName, From&#125; | Start_req]&#125;&#125;;</div><div class="line">                <span class="literal">true</span> -&gt;</div><div class="line">                    SS = S#state&#123;start_p_false = [&#123;AppName, RestartType, normal, From&#125; |</div><div class="line">                                  SPF]&#125;,</div><div class="line">                    &#123;reply, ok, SS&#125;</div><div class="line">                <span class="keyword">end</span></div><div class="line">            <span class="keyword">end</span>;</div><div class="line">        &#123;error, _R&#125; = Error -&gt;</div><div class="line">            &#123;reply, Error, S&#125;</div><div class="line">        <span class="keyword">end</span>;</div><div class="line">    &#123;AppName, _FromX&#125; -&gt;</div><div class="line">        SS = S#state&#123;start_req = [&#123;AppName, From&#125; | Start_req]&#125;,</div><div class="line">        &#123;noreply, SS&#125;</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="title">spawn_starter</span><span class="params">(From, Appl, S, Type)</span> -&gt;</span></div><div class="line">    spawn_link(?MODULE, init_starter, [From, Appl, S, Type]).</div><div class="line"></div><div class="line"><span class="function"><span class="title">init_starter</span><span class="params">(_From, Appl, S, Type)</span> -&gt;</span></div><div class="line">    process_flag(trap_exit, true),</div><div class="line">    AppName = Appl#appl.name,</div><div class="line">    gen_server:cast(?AC, &#123;application_started, AppName, </div><div class="line">              catch start_appl(Appl, S, Type)&#125;).</div><div class="line"></div><div class="line"><span class="function"><span class="title">start_appl</span><span class="params">(Appl, S, Type)</span> -&gt;</span></div><div class="line">    ApplData = Appl#appl.appl_data,</div><div class="line">    <span class="keyword">case</span> ApplData#appl_data.mod <span class="keyword">of</span></div><div class="line">    [] -&gt;</div><div class="line">        &#123;ok, undefined&#125;;</div><div class="line">    _ -&gt; </div><div class="line">        <span class="comment">%% Name = ApplData#appl_data.name,</span></div><div class="line">        Running = S#state.running,</div><div class="line">        foreach(</div><div class="line">          <span class="keyword">fun</span>(AppName) -&gt;</div><div class="line">              <span class="keyword">case</span> lists:keymember(AppName, <span class="number">1</span>, Running) <span class="keyword">of</span></div><div class="line">              <span class="literal">true</span> -&gt;</div><div class="line">                  ok;</div><div class="line">              <span class="literal">false</span> -&gt;</div><div class="line">                  throw(&#123;info, &#123;not_running, AppName&#125;&#125;)</div><div class="line">              <span class="keyword">end</span></div><div class="line">          <span class="keyword">end</span>, Appl#appl.apps),</div><div class="line">        <span class="keyword">case</span> application_master:start_link(ApplData, Type) <span class="keyword">of</span></div><div class="line">        &#123;ok, _Pid&#125; = Ok -&gt;</div><div class="line">            Ok;</div><div class="line">        &#123;error, _Reason&#125; = Error -&gt;</div><div class="line">            throw(Error)</div><div class="line">        <span class="keyword">end</span></div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">handle_cast</span><span class="params">(&#123;application_started, AppName, Res&#125;, S)</span> -&gt;</span></div><div class="line">    handle_application_started(AppName, Res, S).</div><div class="line"></div><div class="line"><span class="function"><span class="title">handle_application_started</span><span class="params">(AppName, Res, S)</span> -&gt;</span></div><div class="line">    #state&#123;starting = Starting, running = Running, started = Started,</div><div class="line">       start_req = Start_req&#125; = S,</div><div class="line">    Start_reqN = reply_to_requester(AppName, Start_req, Res),</div><div class="line">    &#123;_AppName, RestartType, _Type, _From&#125; = lists:keyfind(AppName, <span class="number">1</span>, Starting),</div><div class="line">    <span class="keyword">case</span> Res <span class="keyword">of</span></div><div class="line">    &#123;ok, Id&#125; -&gt;</div><div class="line">        <span class="keyword">case</span> AppName <span class="keyword">of</span></div><div class="line">        kernel -&gt; check_user();</div><div class="line">        _ -&gt; ok</div><div class="line">        <span class="keyword">end</span>,</div><div class="line">        info_started(AppName, nd(Id)),</div><div class="line">        notify_cntrl_started(AppName, Id, S, ok),</div><div class="line">        NRunning = keyreplaceadd(AppName, <span class="number">1</span>, Running,&#123;AppName,Id&#125;),</div><div class="line">        NStarted = keyreplaceadd(AppName, <span class="number">1</span>, Started,&#123;AppName,RestartType&#125;),</div><div class="line">        NewS =  S#state&#123;starting = keydelete(AppName, <span class="number">1</span>, Starting),</div><div class="line">                running = NRunning,</div><div class="line">                started = NStarted,</div><div class="line">                start_req = Start_reqN&#125;,</div><div class="line">        <span class="comment">%% The permission may have been changed during start</span></div><div class="line">        Perm = application:get_env(kernel, permissions),</div><div class="line">        <span class="keyword">case</span> &#123;Perm, Id&#125; <span class="keyword">of</span></div><div class="line">        &#123;undefined, _&#125; -&gt;</div><div class="line">            &#123;noreply, NewS&#125;;</div><div class="line">        <span class="comment">%% Check only if the application is started on the own node</span></div><div class="line">        &#123;&#123;ok, Perms&#125;, &#123;distributed, StartNode&#125;&#125; <span class="keyword">when</span> StartNode =:= node() -&gt;</div><div class="line">            <span class="keyword">case</span> lists:member(&#123;AppName, false&#125;, Perms) <span class="keyword">of</span></div><div class="line">            <span class="literal">true</span> -&gt;</div><div class="line">                #state&#123;running = StopRunning, started = StopStarted&#125; = NewS,</div><div class="line">                <span class="keyword">case</span> lists:keyfind(AppName, <span class="number">1</span>, StopRunning) <span class="keyword">of</span></div><div class="line">                &#123;_AppName, Id&#125; -&gt;</div><div class="line">                    &#123;_AppName2, Type&#125; =</div><div class="line">                    lists:keyfind(AppName, <span class="number">1</span>, StopStarted),</div><div class="line">                    stop_appl(AppName, Id, Type),</div><div class="line">                    NStopRunning = keydelete(AppName, <span class="number">1</span>, StopRunning),</div><div class="line">                    cntrl(AppName, NewS, &#123;ac_application_stopped, AppName&#125;),</div><div class="line">                    &#123;noreply, NewS#state&#123;running = NStopRunning,</div><div class="line">                            started = StopStarted&#125;&#125;;</div><div class="line">                <span class="literal">false</span> -&gt;</div><div class="line">                    &#123;noreply, NewS&#125;</div><div class="line">                <span class="keyword">end</span>;</div><div class="line">            <span class="literal">false</span> -&gt;</div><div class="line">                &#123;noreply, NewS&#125;</div><div class="line">            <span class="keyword">end</span>;</div><div class="line">        _ -&gt;</div><div class="line">            &#123;noreply, NewS&#125;</div><div class="line">        <span class="keyword">end</span>;</div><div class="line">    &#123;error, R&#125; = Error <span class="keyword">when</span> RestartType =:= temporary -&gt;</div><div class="line">        notify_cntrl_started(AppName, undefined, S, Error),</div><div class="line">        info_exited(AppName, R, RestartType),</div><div class="line">        &#123;noreply, S#state&#123;starting = keydelete(AppName, <span class="number">1</span>, Starting),</div><div class="line">                  start_req = Start_reqN&#125;&#125;;</div><div class="line">    &#123;info, R&#125; <span class="keyword">when</span> RestartType =:= temporary -&gt;</div><div class="line">        notify_cntrl_started(AppName, undefined, S, &#123;error, R&#125;),</div><div class="line">        &#123;noreply, S#state&#123;starting = keydelete(AppName, <span class="number">1</span>, Starting),</div><div class="line">                  start_req = Start_reqN&#125;&#125;;</div><div class="line">    &#123;ErrInf, R&#125; <span class="keyword">when</span> RestartType =:= transient, ErrInf =:= error;</div><div class="line">             RestartType =:= transient, ErrInf =:= info -&gt;</div><div class="line">        notify_cntrl_started(AppName, undefined, S, &#123;error, R&#125;),</div><div class="line">        <span class="keyword">case</span> ErrInf <span class="keyword">of</span></div><div class="line">        error -&gt;</div><div class="line">            info_exited(AppName, R, RestartType);</div><div class="line">        info -&gt;</div><div class="line">            ok</div><div class="line">        <span class="keyword">end</span>,</div><div class="line">        <span class="keyword">case</span> R <span class="keyword">of</span></div><div class="line">        &#123;&#123;'EXIT',normal&#125;,_Call&#125; -&gt;</div><div class="line">            &#123;noreply, S#state&#123;starting = keydelete(AppName, <span class="number">1</span>, Starting),</div><div class="line">                      start_req = Start_reqN&#125;&#125;;</div><div class="line">        _ -&gt;</div><div class="line">            Reason = &#123;application_start_failure, AppName, R&#125;,</div><div class="line">            &#123;stop, to_string(Reason), S&#125;</div><div class="line">        <span class="keyword">end</span>;</div><div class="line">    &#123;error, R&#125; = Error -&gt; <span class="comment">%% permanent</span></div><div class="line">        notify_cntrl_started(AppName, undefined, S, Error),</div><div class="line">        info_exited(AppName, R, RestartType),</div><div class="line">        Reason = &#123;application_start_failure, AppName, R&#125;,</div><div class="line">        &#123;stop, to_string(Reason), S&#125;;</div><div class="line">    &#123;info, R&#125; -&gt; <span class="comment">%% permanent</span></div><div class="line">        notify_cntrl_started(AppName, undefined, S, &#123;error, R&#125;),</div><div class="line">        Reason = &#123;application_start_failure, AppName, R&#125;,</div><div class="line">        &#123;stop, to_string(Reason), S&#125;</div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure>
+<h3 id="stop-application-1"><a href="#stop-application-1" class="headerlink" title="stop_application/1"></a>stop_application/1</h3><p>application_controller收到stop_application消息后，首先检查application是否运行中(记录在#state.running中)，如果没有则检查是否已启动(记录在#state.started中)。stop_appl/3关闭application_master进程，然后删除#state.running和#state.started中的记录，更新state。调用这个函数来关闭application，不会影响到其他的app。</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">stop_application</span><span class="params">(AppName)</span> -&gt;</span></div><div class="line">    gen_server:call(?AC, &#123;stop_application, AppName&#125;, infinity).</div><div class="line"><span class="function"><span class="title">handle_call</span><span class="params">(&#123;stop_application, AppName&#125;, _From, S)</span> -&gt;</span></div><div class="line">    #state&#123;running = Running, started = Started&#125; = S,</div><div class="line">    <span class="keyword">case</span> lists:keyfind(AppName, <span class="number">1</span>, Running) <span class="keyword">of</span></div><div class="line">    &#123;_AppName, Id&#125; -&gt;</div><div class="line">        &#123;_AppName2, Type&#125; = lists:keyfind(AppName, <span class="number">1</span>, Started),</div><div class="line">        stop_appl(AppName, Id, Type),</div><div class="line">        NRunning = keydelete(AppName, <span class="number">1</span>, Running),</div><div class="line">        NStarted = keydelete(AppName, <span class="number">1</span>, Started),</div><div class="line">        cntrl(AppName, S, &#123;ac_application_stopped, AppName&#125;),</div><div class="line">        &#123;reply, ok, S#state&#123;running = NRunning, started = NStarted&#125;&#125;;</div><div class="line">    <span class="literal">false</span> -&gt;</div><div class="line">        <span class="keyword">case</span> lists:keymember(AppName, <span class="number">1</span>, Started) <span class="keyword">of</span></div><div class="line">        <span class="literal">true</span> -&gt;</div><div class="line">            NStarted = keydelete(AppName, <span class="number">1</span>, Started),</div><div class="line">            cntrl(AppName, S, &#123;ac_application_stopped, AppName&#125;),</div><div class="line">            &#123;reply, ok, S#state&#123;started = NStarted&#125;&#125;;</div><div class="line">        <span class="literal">false</span> -&gt;</div><div class="line">            &#123;reply, &#123;error, &#123;not_started, AppName&#125;&#125;, S&#125;</div><div class="line">        <span class="keyword">end</span></div><div class="line">    <span class="keyword">end</span>;</div><div class="line"></div><div class="line"><span class="comment">%%-----------------------------------------------------------------</span></div><div class="line"><span class="comment">%% Stop application locally.</span></div><div class="line"><span class="comment">%%-----------------------------------------------------------------</span></div><div class="line"><span class="function"><span class="title">stop_appl</span><span class="params">(AppName, Id, Type)</span> <span class="title">when</span> <span class="title">is_pid</span><span class="params">(Id)</span> -&gt;</span></div><div class="line">    unlink(Id),</div><div class="line">    application_master:stop(Id),</div><div class="line">    info_exited(AppName, stopped, Type),</div><div class="line">    ets:delete(ac_tab, &#123;application_master, AppName&#125;);</div><div class="line"><span class="function"><span class="title">stop_appl</span><span class="params">(AppName, undefined, Type)</span> -&gt;</span></div><div class="line">    <span class="comment">%% Code-only application stopped</span></div><div class="line">    info_exited(AppName, stopped, Type);</div><div class="line"><span class="function"><span class="title">stop_appl</span><span class="params">(_AppName, _Id, _Type)</span> -&gt;</span></div><div class="line">    <span class="comment">%% Distributed application stopped</span></div><div class="line">    ok.</div></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>&emsp;&emsp;application_controller由init进程启动，启动时加载了kernel application的配置数据，在启动kernel application后group_leader由init变为user。application_controller是gen_server行为的进程，为application模块提供相关接口，统一管理application，而每个application又由application_master进程管理。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Erlang/" rel="tag"># Erlang</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/Erlang启动过程学习/" rel="prev" title="Erlang启动过程学习">
+                Erlang启动过程学习 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="毛毛大人" />
+          <p class="site-author-name" itemprop="name">毛毛大人</p>
+           
+              <p class="site-description motion-element" itemprop="description">学无止境</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-1"><span class="nav-number">2.</span> <span class="nav-text">start/1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#terminate-2"><span class="nav-number">3.</span> <span class="nav-text">terminate/2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#load-application-1，unload-application-1"><span class="nav-number">4.</span> <span class="nav-text">load_application/1，unload_application/1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-application-2"><span class="nav-number">5.</span> <span class="nav-text">start_application/2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stop-application-1"><span class="nav-number">6.</span> <span class="nav-text">stop_application/1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">毛毛大人</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
