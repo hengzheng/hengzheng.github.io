@@ -1,0 +1,729 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Erlang," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="简介&amp;emsp;&amp;emsp;application_master是OTP application的管理进程。application_controller控制Erlang虚拟机中所有的application，而application_master则管理单个application。application配置数据中的mod字段定义了application_master的回调模块和启动参数，回调函数sta">
+<meta name="keywords" content="Erlang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Erlang源码学习--application_master">
+<meta property="og:url" content="https://hengzheng.github.io/2017/Erlang源码学习-application-master/index.html">
+<meta property="og:site_name" content="充电桩">
+<meta property="og:description" content="简介&amp;emsp;&amp;emsp;application_master是OTP application的管理进程。application_controller控制Erlang虚拟机中所有的application，而application_master则管理单个application。application配置数据中的mod字段定义了application_master的回调模块和启动参数，回调函数sta">
+<meta property="og:updated_time" content="2017-06-14T09:56:17.671Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Erlang源码学习--application_master">
+<meta name="twitter:description" content="简介&amp;emsp;&amp;emsp;application_master是OTP application的管理进程。application_controller控制Erlang虚拟机中所有的application，而application_master则管理单个application。application配置数据中的mod字段定义了application_master的回调模块和启动参数，回调函数sta">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hengzheng.github.io/2017/Erlang源码学习-application-master/"/>
+
+
+
+
+
+  <title> Erlang源码学习--application_master | 充电桩 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">充电桩</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-application-master/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Erlang源码学习--application_master
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-12T11:04:31+08:00">
+                2017-06-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Erlang/" itemprop="url" rel="index">
+                    <span itemprop="name">Erlang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;application_master是OTP application的管理进程。application_controller控制Erlang虚拟机中所有的application，而application_master则管理单个application。application配置数据中的mod字段定义了application_master的回调模块和启动参数，回调函数start/5启动的通常为supervisor进程。</p>
+<a id="more"></a>
+<h3 id="start-link-2"><a href="#start-link-2" class="headerlink" title="start_link/2"></a>start_link/2</h3><p>start_link/2通过proc_lib:start_link/3创建同步进程调用init/4来启动application_master进程。init/4首先和application_controller(Parent)建立link，设置group_leader为自己（相同group的进程IO都会被导到group_leader）；接着ac_tab中插入master进程信息，设置state；然后调用start_it/2来回调mod字段字义的模块启动函数。start_it/2启动新进程（因为application_master是group_leader，还要处理IO）来执行启动逻辑start_it/4，此时init/4进入到init_loop/4循环。start_it/4调用M:start/2启动监控树，然后返回自己Pid给init/4，进入到loop_it/4循环。init/4收到start_it返回的Pid后，记录到#state.child中，然后给上级的starter返回init/4进程Pid，此时application_master启动完毕。</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">start_link</span><span class="params">(ApplData, Type)</span> -&gt;</span></div><div class="line">    Parent = whereis(application_controller),</div><div class="line">    proc_lib:start_link(application_master, init,</div><div class="line">            [Parent, self(), ApplData, Type]).</div><div class="line"></div><div class="line"><span class="function"><span class="title">init</span><span class="params">(Parent, Starter, ApplData, Type)</span> -&gt;</span></div><div class="line">    link(Parent),</div><div class="line">    process_flag(trap_exit, true),</div><div class="line">    OldGleader = group_leader(),</div><div class="line">    group_leader(self(), self()),</div><div class="line">    <span class="comment">%% Insert ourselves as master for the process.  This ensures that</span></div><div class="line">    <span class="comment">%% the processes in the application can use get_env/1 at startup.</span></div><div class="line">    Name = ApplData#appl_data.name,</div><div class="line">    ets:insert(ac_tab, &#123;&#123;application_master, Name&#125;, self()&#125;),</div><div class="line">    State = #state&#123;appl_data = ApplData, gleader = OldGleader&#125;,</div><div class="line">    <span class="keyword">case</span> start_it(State, Type) <span class="keyword">of</span></div><div class="line">        &#123;ok, Pid&#125; -&gt;          <span class="comment">% apply(M,F,A) returned ok</span></div><div class="line">            set_timer(ApplData#appl_data.maxT),</div><div class="line">            unlink(Starter),</div><div class="line">            proc_lib:init_ack(Starter, &#123;ok,self()&#125;),</div><div class="line">            main_loop(Parent, State#state&#123;child = Pid&#125;);</div><div class="line">        &#123;error, Reason&#125; -&gt;    <span class="comment">% apply(M,F,A) returned error</span></div><div class="line">            exit(Reason);</div><div class="line">        Else -&gt;               <span class="comment">% apply(M,F,A) returned erroneous</span></div><div class="line">            exit(Else)</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">start_it</span><span class="params">(State, Type)</span> -&gt;</span></div><div class="line">    Tag = make_ref(),</div><div class="line">    Pid = spawn_link(application_master, start_it, [Tag, State, self(), Type]),</div><div class="line">    init_loop(Pid, Tag, State, Type).</div><div class="line"></div><div class="line"><span class="function"><span class="title">start_it_old</span><span class="params">(Tag, From, Type, ApplData)</span> -&gt;</span></div><div class="line">    &#123;M,A&#125; = ApplData#appl_data.mod,</div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> M:start(Type, A) <span class="keyword">of</span></div><div class="line">    &#123;ok, Pid&#125; -&gt;</div><div class="line">        link(Pid),</div><div class="line">        From ! &#123;Tag, &#123;ok, self()&#125;&#125;,</div><div class="line">        loop_it(From, Pid, M, []);</div><div class="line">    &#123;ok, Pid, AppState&#125; -&gt;</div><div class="line">        link(Pid),</div><div class="line">        From ! &#123;Tag, &#123;ok, self()&#125;&#125;,</div><div class="line">        loop_it(From, Pid, M, AppState);</div><div class="line">    &#123;'EXIT', normal&#125; -&gt;</div><div class="line">        From ! &#123;Tag, &#123;error, &#123;&#123;'EXIT',normal&#125;,&#123;M,start,[Type,A]&#125;&#125;&#125;&#125;;</div><div class="line">    &#123;error, Reason&#125; -&gt;</div><div class="line">        From ! &#123;Tag, &#123;error, &#123;Reason, &#123;M,start,[Type,A]&#125;&#125;&#125;&#125;;</div><div class="line">    Other -&gt;</div><div class="line">        From ! &#123;Tag, &#123;error, &#123;bad_return,&#123;&#123;M,start,[Type,A]&#125;,Other&#125;&#125;&#125;&#125;</div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure>
+<h3 id="stop-1"><a href="#stop-1" class="headerlink" title="stop/1"></a>stop/1</h3><p>通过给application_master发stop消息来结束进程，这里通过receive来进行同步关闭。application_master收到stop消息后，调用terminate/2来结束#state.child和#state.children里记录的进程。terminate_child/2通过给Child发terminate来结束进程，Child进程也就是start_it/2里启动的进程，然后applicatin_master进入到terminate_loop/2循环，等待Child进程结束。kill_children/2通过给进程发{‘EXIT’, Parent, kill}消息（exit(Pid, kill)）来结束，同时用同样的方式结束没有记录在#state.children而group_leader是application_master的进程。Child进程在收到terminate消息后，先执行回调模块的prep_stop/2函数，进行结束前的一些处理，然后给M:start/2启动的监控树进程发送{‘EXIT’, Parent, shutdown}（exit(Pid, shutdown)）消息来结束监控树，最后再调用回调模块的stop/1函数，此时Child关闭。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">stop</span><span class="params">(AppMaster)</span> -&gt;</span> call(AppMaster, stop).</div><div class="line"></div><div class="line"><span class="function"><span class="title">call</span><span class="params">(AppMaster, Req)</span> -&gt;</span></div><div class="line">    Tag = make_ref(),</div><div class="line">    Ref = erlang:monitor(process, AppMaster),</div><div class="line">    AppMaster ! &#123;Req, Tag, self()&#125;,</div><div class="line">    <span class="keyword">receive</span></div><div class="line">    &#123;'DOWN', Ref, process, _, _Info&#125; -&gt;</div><div class="line">        ok;</div><div class="line">    &#123;Tag, Res&#125; -&gt;</div><div class="line">        erlang:demonitor(Ref, [flush]),</div><div class="line">        Res</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">terminate</span><span class="params">(Reason, State)</span> -&gt;</span></div><div class="line">    terminate_child(State#state.child, State),</div><div class="line">    kill_children(State#state.children),</div><div class="line">    exit(Reason).</div><div class="line"></div><div class="line"><span class="function"><span class="title">terminate_child_i</span><span class="params">(Child, State)</span> -&gt;</span></div><div class="line">    Child ! &#123;self(), terminate&#125;,</div><div class="line">    terminate_loop(Child, State).</div><div class="line"></div><div class="line"><span class="comment">%% Try to shutdown the child gently</span></div><div class="line"><span class="function"><span class="title">terminate_child</span><span class="params">(undefined, _)</span> -&gt;</span> ok;</div><div class="line"><span class="function"><span class="title">terminate_child</span><span class="params">(Child, State)</span> -&gt;</span></div><div class="line">    terminate_child_i(Child, State).</div><div class="line"></div><div class="line"><span class="function"><span class="title">kill_children</span><span class="params">(Children)</span> -&gt;</span></div><div class="line">    lists:foreach(<span class="keyword">fun</span>(Pid) -&gt; exit(Pid, kill) <span class="keyword">end</span>, Children),</div><div class="line">    kill_all_procs().</div><div class="line"></div><div class="line"><span class="function"><span class="title">kill_all_procs</span><span class="params">()</span> -&gt;</span></div><div class="line">    kill_all_procs_1(processes(), self(), <span class="number">0</span>).</div><div class="line"></div><div class="line"><span class="function"><span class="title">kill_all_procs_1</span><span class="params">([Self|Ps], Self, N)</span> -&gt;</span></div><div class="line">    kill_all_procs_1(Ps, Self, N);</div><div class="line"><span class="function"><span class="title">kill_all_procs_1</span><span class="params">([P|Ps], Self, N)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> process_info(P, group_leader) <span class="keyword">of</span></div><div class="line">    &#123;group_leader,Self&#125; -&gt;</div><div class="line">        exit(P, kill),</div><div class="line">        kill_all_procs_1(Ps, Self, N+<span class="number">1</span>);</div><div class="line">    _ -&gt;</div><div class="line">        kill_all_procs_1(Ps, Self, N)</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">kill_all_procs_1</span><span class="params">([], _, <span class="number">0</span>)</span> -&gt;</span> ok;</div><div class="line"><span class="function"><span class="title">kill_all_procs_1</span><span class="params">([], _, _)</span> -&gt;</span> kill_all_procs().</div></pre></td></tr></table></figure></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>&emsp;&emsp;application_master进程启动时是同步的，而同时又作为group_leader进程，假如M:start/2函数里有IO请求，就会造成死锁，所以需要额外新起个start_it/4进程来执行启动过程。application_master进程是application这组集合的group_leader。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Erlang/" rel="tag"># Erlang</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/Erlang源码学习-application-controller/" rel="prev" title="Erlang源码学习--application_controller">
+                Erlang源码学习--application_controller <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="毛毛大人" />
+          <p class="site-author-name" itemprop="name">毛毛大人</p>
+           
+              <p class="site-description motion-element" itemprop="description">学无止境</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-link-2"><span class="nav-number">2.</span> <span class="nav-text">start_link/2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stop-1"><span class="nav-number">3.</span> <span class="nav-text">stop/1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">毛毛大人</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
