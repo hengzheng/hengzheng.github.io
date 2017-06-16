@@ -1,0 +1,732 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Erlang," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="简介&amp;emsp;&amp;emsp;supervisor是监控树管理进程，监控其管理的子进程的行为，比如启动，关闭，重启策略。supervisor进程是个gen_server行为的进程，其子进程可以在回调函数init/1中指明，然后随supervisor一起启动，也可以在supervisor启动后调用start_child/2来启动。子进程的启动是一个接一个的同步启动，而结束时则按启动顺序的反序进行。">
+<meta name="keywords" content="Erlang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Erlang源码学习--supervisor">
+<meta property="og:url" content="https://hengzheng.github.io/2017/Erlang源码学习-supervisor/index.html">
+<meta property="og:site_name" content="充电桩">
+<meta property="og:description" content="简介&amp;emsp;&amp;emsp;supervisor是监控树管理进程，监控其管理的子进程的行为，比如启动，关闭，重启策略。supervisor进程是个gen_server行为的进程，其子进程可以在回调函数init/1中指明，然后随supervisor一起启动，也可以在supervisor启动后调用start_child/2来启动。子进程的启动是一个接一个的同步启动，而结束时则按启动顺序的反序进行。">
+<meta property="og:updated_time" content="2017-06-16T06:28:50.206Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Erlang源码学习--supervisor">
+<meta name="twitter:description" content="简介&amp;emsp;&amp;emsp;supervisor是监控树管理进程，监控其管理的子进程的行为，比如启动，关闭，重启策略。supervisor进程是个gen_server行为的进程，其子进程可以在回调函数init/1中指明，然后随supervisor一起启动，也可以在supervisor启动后调用start_child/2来启动。子进程的启动是一个接一个的同步启动，而结束时则按启动顺序的反序进行。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hengzheng.github.io/2017/Erlang源码学习-supervisor/"/>
+
+
+
+
+
+  <title> Erlang源码学习--supervisor | 充电桩 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">充电桩</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-supervisor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Erlang源码学习--supervisor
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-15T14:08:14+08:00">
+                2017-06-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Erlang/" itemprop="url" rel="index">
+                    <span itemprop="name">Erlang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;supervisor是监控树管理进程，监控其管理的子进程的行为，比如启动，关闭，重启策略。supervisor进程是个gen_server行为的进程，其子进程可以在回调函数init/1中指明，然后随supervisor一起启动，也可以在supervisor启动后调用start_child/2来启动。子进程的启动是一个接一个的同步启动，而结束时则按启动顺序的反序进行。</p>
+<a id="more"></a>
+<h3 id="start-link-2-start-link-3"><a href="#start-link-2-start-link-3" class="headerlink" title="start_link/2;start_link/3"></a>start_link/2;start_link/3</h3><p>启动supervisor进程，对应调用的是gen_server:start_link/3;gen_server_start_link/4。gen_server回调模块为supervisor，回调函数为init/1，init的参数为start_link的参数, 定义supervisor进程注册名（可忽略），回调模块和回调参数。gen_server回调函数init/1调用supervisor定义的回调模块对应的回调函数（Mod:init/1），然后初始化state，SupFlags包括三个参数，为{Strategy（重启策略）, MaxIntensity（一定时间内子进程重启次数）, Period（一定时间，单位为秒）}，如果StartSpec指明有child子进程，则启动。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">start_link</span><span class="params">(Mod, Args)</span> -&gt;</span></div><div class="line">    gen_server:start_link(supervisor, &#123;self, Mod, Args&#125;, []).</div><div class="line"></div><div class="line"><span class="function"><span class="title">start_link</span><span class="params">(SupName, Mod, Args)</span> -&gt;</span></div><div class="line">    gen_server:start_link(SupName, supervisor, &#123;SupName, Mod, Args&#125;, []).</div><div class="line"></div><div class="line"><span class="function"><span class="title">init</span><span class="params">(&#123;SupName, Mod, Args&#125;)</span> -&gt;</span></div><div class="line">    process_flag(trap_exit, true),</div><div class="line">    <span class="keyword">case</span> Mod:init(Args) <span class="keyword">of</span></div><div class="line">    &#123;ok, &#123;SupFlags, StartSpec&#125;&#125; -&gt;</div><div class="line">        <span class="keyword">case</span> init_state(SupName, SupFlags, Mod, Args) <span class="keyword">of</span></div><div class="line">        &#123;ok, State&#125; <span class="keyword">when</span> ?is_simple(State) -&gt; <span class="comment">% simple_one_for_one</span></div><div class="line">            init_dynamic(State, StartSpec); <span class="comment">% 只记录#child&#123;&#125;数据，没有子进程启动</span></div><div class="line">        &#123;ok, State&#125; -&gt;</div><div class="line">            init_children(State, StartSpec); <span class="comment">% 记录#child&#123;&#125;数据，同时启动子进程</span></div><div class="line">        Error -&gt;</div><div class="line">            &#123;stop, &#123;supervisor_data, Error&#125;&#125;</div><div class="line">        <span class="keyword">end</span>;</div><div class="line">    ignore -&gt;</div><div class="line">        ignore;</div><div class="line">    Error -&gt;</div><div class="line">        &#123;stop, &#123;bad_return, &#123;Mod, init, Error&#125;&#125;&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="comment">% supervisor的state</span></div><div class="line"><span class="keyword">-record</span><span class="params">(state, &#123;</span></div><div class="line">        name,            <span class="comment">% SupName or &#123;self(), Mod&#125;</span></div><div class="line">        strategy,        <span class="comment">% 重启策略（one_for_one|one_for_all|rest_for_one|simple_one_for_one）</span></div><div class="line">        children = [],   <span class="comment">% 子进程#child&#123;&#125;列表</span></div><div class="line">        dynamics,        <span class="comment">% 动态子进程(sets或者dict存储)</span></div><div class="line">        intensity,       <span class="comment">% 一定时间内最大重启次数</span></div><div class="line">        period,          <span class="comment">% 一定时间</span></div><div class="line">        restarts = [],   <span class="comment">% 最近重启的时间列表</span></div><div class="line">        module,          <span class="comment">% 回调模块</span></div><div class="line">        args             <span class="comment">% 回调函数init的参数</span></div><div class="line">    &#125;).</div><div class="line"></div><div class="line"><span class="comment">% supervisor的child</span></div><div class="line"><span class="keyword">-record</span><span class="params">(child, &#123;</span></div><div class="line">        pid,            <span class="comment">% pid</span></div><div class="line">        name,           <span class="comment">% 名字</span></div><div class="line">        mfargs,         <span class="comment">% 启动函数&#123;M,F,A&#125;</span></div><div class="line">        restart_type,   <span class="comment">% 重启类型（permanent | transient | temporary）</span></div><div class="line">        shutdown,       <span class="comment">% brutal_kill|关闭超时时间</span></div><div class="line">        child_type,     <span class="comment">% 类型（worker | supervisor）</span></div><div class="line">        modules = []    <span class="comment">% 回调模块</span></div><div class="line">    &#125;).</div></pre></td></tr></table></figure></p>
+<h3 id="重启策略"><a href="#重启策略" class="headerlink" title="重启策略"></a>重启策略</h3><p>supervisor的重启策略：<br>one_for_one：某个子进程结束了，只有该子进程会被重启；<br>one_for_all：某个子进程结束了，所有的子进程都将被重启；<br>rest_for_one：某个子进程结束了，启动顺序中其后面的子进程也会被重启；<br>simple_one_for_one：所有子进程动态启动，且行为一致（用同样的代码）。此类型不能使用delete_child/2和restart_child/2函数，terminate_child/2可以指定子进程的pid来结束子进程。<br>supervisor子进程重启类型：<br>permanent：如果进程结束，必定会被重启；<br>transient：进程只在非正常结束时，会被重启（结束原因不是normal，shutdown，{shutdown, _Other}）；<br>temporary：如果进程结束，不会被重启（不受supervisor重启策略影响，即使是one_for_all或者是rest_for_one）.</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div></pre></td><td class="code"><pre><div class="line"><span class="comment">% permanent类型的子进程</span></div><div class="line"><span class="function"><span class="title">do_restart</span><span class="params">(permanent, Reason, Child, State)</span> -&gt;</span></div><div class="line">    report_error(child_terminated, Reason, Child, State#state.name),</div><div class="line">    restart(Child, State);</div><div class="line"><span class="function"><span class="title">do_restart</span><span class="params">(_, normal, Child, State)</span> -&gt;</span></div><div class="line">    NState = state_del_child(Child, State),</div><div class="line">    &#123;ok, NState&#125;;</div><div class="line"><span class="function"><span class="title">do_restart</span><span class="params">(_, shutdown, Child, State)</span> -&gt;</span></div><div class="line">    NState = state_del_child(Child, State),</div><div class="line">    &#123;ok, NState&#125;;</div><div class="line"><span class="function"><span class="title">do_restart</span><span class="params">(_, &#123;shutdown, _Term&#125;, Child, State)</span> -&gt;</span></div><div class="line">    NState = state_del_child(Child, State),</div><div class="line">    &#123;ok, NState&#125;;</div><div class="line"><span class="comment">% 非正常结束的transient类型的子进程</span></div><div class="line"><span class="function"><span class="title">do_restart</span><span class="params">(transient, Reason, Child, State)</span> -&gt;</span></div><div class="line">    report_error(child_terminated, Reason, Child, State#state.name),</div><div class="line">    restart(Child, State);</div><div class="line"><span class="comment">% temporary类型的子进程</span></div><div class="line"><span class="function"><span class="title">do_restart</span><span class="params">(temporary, Reason, Child, State)</span> -&gt;</span></div><div class="line">    report_error(child_terminated, Reason, Child, State#state.name),</div><div class="line">    NState = state_del_child(Child, State),</div><div class="line">    &#123;ok, NState&#125;.</div><div class="line"></div><div class="line"><span class="comment">% supervisor重启策略的相关代码</span></div><div class="line"><span class="function"><span class="title">restart</span><span class="params">(simple_one_for_one, Child, State)</span> -&gt;</span></div><div class="line">    #child&#123;pid = OldPid, mfargs = &#123;M, F, A&#125;&#125; = Child,</div><div class="line">    Dynamics = ?DICT:erase(OldPid, dynamics_db(Child#child.restart_type,</div><div class="line">                           State#state.dynamics)),</div><div class="line">    <span class="keyword">case</span> do_start_child_i(M, F, A) <span class="keyword">of</span></div><div class="line">    &#123;ok, Pid&#125; -&gt;</div><div class="line">        NState = State#state&#123;dynamics = ?DICT:store(Pid, A, Dynamics)&#125;,</div><div class="line">        &#123;ok, NState&#125;;</div><div class="line">    &#123;ok, Pid, _Extra&#125; -&gt;</div><div class="line">        NState = State#state&#123;dynamics = ?DICT:store(Pid, A, Dynamics)&#125;,</div><div class="line">        &#123;ok, NState&#125;;</div><div class="line">    &#123;error, Error&#125; -&gt;</div><div class="line">        NState = State#state&#123;dynamics = ?DICT:store(restarting(OldPid), A,</div><div class="line">                            Dynamics)&#125;,</div><div class="line">        report_error(start_error, Error, Child, State#state.name),</div><div class="line">        &#123;try_again, NState&#125;</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">restart</span><span class="params">(one_for_one, Child, State)</span> -&gt;</span></div><div class="line">    OldPid = Child#child.pid,</div><div class="line">    <span class="keyword">case</span> do_start_child(State#state.name, Child) <span class="keyword">of</span></div><div class="line">        &#123;ok, Pid&#125; -&gt;</div><div class="line">        NState = replace_child(Child#child&#123;pid = Pid&#125;, State),</div><div class="line">        &#123;ok, NState&#125;;</div><div class="line">    &#123;ok, Pid, _Extra&#125; -&gt;</div><div class="line">        NState = replace_child(Child#child&#123;pid = Pid&#125;, State),</div><div class="line">        &#123;ok, NState&#125;;</div><div class="line">    &#123;error, Reason&#125; -&gt;</div><div class="line">        NState = replace_child(Child#child&#123;pid = restarting(OldPid)&#125;, State),</div><div class="line">        report_error(start_error, Reason, Child, State#state.name),</div><div class="line">        &#123;try_again, NState&#125;</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">restart</span><span class="params">(rest_for_one, Child, State)</span> -&gt;</span></div><div class="line">    &#123;ChAfter, ChBefore&#125; = split_child(Child#child.pid, State#state.children),</div><div class="line">    ChAfter2 = terminate_children(ChAfter, State#state.name),</div><div class="line">    <span class="keyword">case</span> start_children(ChAfter2, State#state.name) <span class="keyword">of</span></div><div class="line">    &#123;ok, ChAfter3&#125; -&gt;</div><div class="line">        &#123;ok, State#state&#123;children = ChAfter3 ++ ChBefore&#125;&#125;;</div><div class="line">    &#123;error, ChAfter3, &#123;failed_to_start_child, ChName, _Reason&#125;&#125;</div><div class="line">        <span class="keyword">when</span> ChName =:= Child#child.name -&gt;</div><div class="line">        NChild = Child#child&#123;pid=restarting(Child#child.pid)&#125;,</div><div class="line">        NState = State#state&#123;children = ChAfter3 ++ ChBefore&#125;,</div><div class="line">        &#123;try_again, replace_child(NChild,NState)&#125;;</div><div class="line">    &#123;error, ChAfter3, &#123;failed_to_start_child, ChName, _Reason&#125;&#125; -&gt;</div><div class="line">        NChild = lists:keyfind(ChName, #child.name, ChAfter3),</div><div class="line">        NChild2 = NChild#child&#123;pid=?restarting(undefined)&#125;,</div><div class="line">        NState = State#state&#123;children = ChAfter3 ++ ChBefore&#125;,</div><div class="line">        &#123;try_again, replace_child(NChild2,NState), NChild2&#125;</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">restart</span><span class="params">(one_for_all, Child, State)</span> -&gt;</span></div><div class="line">    Children1 = del_child(Child#child.pid, State#state.children),</div><div class="line">    Children2 = terminate_children(Children1, State#state.name),</div><div class="line">    <span class="keyword">case</span> start_children(Children2, State#state.name) <span class="keyword">of</span></div><div class="line">        &#123;ok, NChs&#125; -&gt;</div><div class="line">            &#123;ok, State#state&#123;children = NChs&#125;&#125;;</div><div class="line">    &#123;error, NChs, &#123;failed_to_start_child, ChName, _Reason&#125;&#125;</div><div class="line">      <span class="keyword">when</span> ChName =:= Child#child.name -&gt;</div><div class="line">        NChild = Child#child&#123;pid=restarting(Child#child.pid)&#125;,</div><div class="line">        NState = State#state&#123;children = NChs&#125;,</div><div class="line">        &#123;try_again, replace_child(NChild,NState)&#125;;</div><div class="line">    &#123;error, NChs, &#123;failed_to_start_child, ChName, _Reason&#125;&#125; -&gt;</div><div class="line">        NChild = lists:keyfind(ChName, #child.name, NChs),</div><div class="line">        NChild2 = NChild#child&#123;pid=?restarting(undefined)&#125;,</div><div class="line">        NState = State#state&#123;children = NChs&#125;,</div><div class="line">        &#123;try_again, replace_child(NChild2,NState), NChild2&#125;</div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure>
+<h3 id="terminate-2"><a href="#terminate-2" class="headerlink" title="terminate/2"></a>terminate/2</h3><p>supervisor是gen_server行为的进程，所以结束时回调到terminate/2。simple_one_for_one的supervisor子进程的存储跟其他类型的不一样，所以特别处理，但是过程类似，都是先moniter子进程，然后根据shutdown类型发对应信息，然后等待子进程退出消息。supervisor子进程为supervisor类型时，shutdown超时时间最好为infinity，这样能确保子监控树有足够的时候来结束；如果子进程的shutdown类型是brutal_kill，则通过exit(Child, kill)来结束子进程，如果是个超时时间T，则先通过exit(Child, shutdown)，如果在T时间内没有shutdown关闭子进程的消息，则无条件的exit(Child, Kill)关闭子进程。子进程是supervisor，gen_server或者gen_fsm行为的进程，则modules是单个元素的列表[Module]，这里的Module为对应的回调模块；如果是gen_event行为则要设置在dynamic。<br>otp16RB03-1版本的代码这里有个bug，当shutdown是个超时时间时，超时后发kill消息那里的size不应该减1，查看最新版本的代码已经修复了。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">terminate</span><span class="params">(_Reason, #state&#123;children=[Child]&#125; = State)</span> <span class="title">when</span> ?<span class="title">is_simple</span><span class="params">(State)</span> -&gt;</span></div><div class="line">    terminate_dynamic_children(Child, dynamics_db(Child#child.restart_type,</div><div class="line">                                                  State#state.dynamics),</div><div class="line">                               State#state.name);</div><div class="line"><span class="function"><span class="title">terminate</span><span class="params">(_Reason, State)</span> -&gt;</span></div><div class="line">    terminate_children(State#state.children, State#state.name).</div><div class="line"></div><div class="line"><span class="function"><span class="title">terminate_children</span><span class="params">([Child = #child&#123;restart_type=temporary&#125; | Children], SupName, Res)</span> -&gt;</span></div><div class="line">    do_terminate(Child, SupName),</div><div class="line">    terminate_children(Children, SupName, Res);</div><div class="line"><span class="function"><span class="title">terminate_children</span><span class="params">([Child | Children], SupName, Res)</span> -&gt;</span></div><div class="line">    NChild = do_terminate(Child, SupName),</div><div class="line">    terminate_children(Children, SupName, [NChild | Res]);</div><div class="line"><span class="function"><span class="title">terminate_children</span><span class="params">([], _SupName, Res)</span> -&gt;</span></div><div class="line">    Res.</div><div class="line"></div><div class="line"><span class="function"><span class="title">do_terminate</span><span class="params">(Child, SupName)</span> <span class="title">when</span> <span class="title">is_pid</span><span class="params">(Child#child.pid)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> shutdown(Child#child.pid, Child#child.shutdown) <span class="keyword">of</span></div><div class="line">        ok -&gt;</div><div class="line">            ok;</div><div class="line">        &#123;error, normal&#125; <span class="keyword">when</span> Child#child.restart_type =/= permanent -&gt;</div><div class="line">            ok;</div><div class="line">        &#123;error, OtherReason&#125; -&gt;</div><div class="line">            report_error(shutdown_error, OtherReason, Child, SupName)</div><div class="line">    <span class="keyword">end</span>,</div><div class="line">    Child#child&#123;pid = undefined&#125;;</div><div class="line"><span class="function"><span class="title">do_terminate</span><span class="params">(Child, _SupName)</span> -&gt;</span></div><div class="line">    Child#child&#123;pid = undefined&#125;.</div><div class="line"></div><div class="line"><span class="function"><span class="title">shutdown</span><span class="params">(Pid, brutal_kill)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> monitor_child(Pid) <span class="keyword">of</span></div><div class="line">    ok -&gt;</div><div class="line">        exit(Pid, kill),</div><div class="line">        <span class="keyword">receive</span></div><div class="line">        &#123;'DOWN', _MRef, process, Pid, killed&#125; -&gt;</div><div class="line">            ok;</div><div class="line">        &#123;'DOWN', _MRef, process, Pid, OtherReason&#125; -&gt;</div><div class="line">            &#123;error, OtherReason&#125;</div><div class="line">        <span class="keyword">end</span>;</div><div class="line">    &#123;error, Reason&#125; -&gt;</div><div class="line">        &#123;error, Reason&#125;</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">shutdown</span><span class="params">(Pid, Time)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> monitor_child(Pid) <span class="keyword">of</span></div><div class="line">    ok -&gt;</div><div class="line">        exit(Pid, shutdown), <span class="comment">%% Try to shutdown gracefully</span></div><div class="line">        <span class="keyword">receive</span></div><div class="line">        &#123;'DOWN', _MRef, process, Pid, shutdown&#125; -&gt;</div><div class="line">            ok;</div><div class="line">        &#123;'DOWN', _MRef, process, Pid, OtherReason&#125; -&gt;</div><div class="line">            &#123;error, OtherReason&#125;</div><div class="line">        <span class="keyword">after</span> Time -&gt;</div><div class="line">            exit(Pid, kill),  <span class="comment">%% Force termination.</span></div><div class="line">            <span class="keyword">receive</span></div><div class="line">            &#123;'DOWN', _MRef, process, Pid, OtherReason&#125; -&gt;</div><div class="line">                &#123;error, OtherReason&#125;</div><div class="line">            <span class="keyword">end</span></div><div class="line">        <span class="keyword">end</span>;</div><div class="line">    &#123;error, Reason&#125; -&gt;</div><div class="line">        &#123;error, Reason&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="comment">%% Help function to shutdown/2 switches from link to monitor approach</span></div><div class="line"><span class="function"><span class="title">monitor_child</span><span class="params">(Pid)</span> -&gt;</span></div><div class="line">    <span class="comment">%% Do the monitor operation first so that if the child dies</span></div><div class="line">    <span class="comment">%% before the monitoring is done causing a 'DOWN'-message with</span></div><div class="line">    <span class="comment">%% reason noproc, we will get the real reason in the 'EXIT'-message</span></div><div class="line">    <span class="comment">%% unless a naughty child has already done unlink...</span></div><div class="line">    erlang:monitor(process, Pid),</div><div class="line">    unlink(Pid),</div><div class="line"></div><div class="line">    <span class="keyword">receive</span></div><div class="line">    <span class="comment">%% If the child dies before the unlik we must empty</span></div><div class="line">    <span class="comment">%% the mail-box of the 'EXIT'-message and the 'DOWN'-message.</span></div><div class="line">    &#123;'EXIT', Pid, Reason&#125; -&gt;</div><div class="line">        <span class="keyword">receive</span></div><div class="line">        &#123;'DOWN', _, process, Pid, _&#125; -&gt;</div><div class="line">            &#123;error, Reason&#125;</div><div class="line">        <span class="keyword">end</span></div><div class="line">    <span class="keyword">after</span> <span class="number">0</span> -&gt;</div><div class="line">        <span class="comment">%% If a naughty child did unlink and the child dies before</span></div><div class="line">        <span class="comment">%% monitor the result will be that shutdown/2 receives a</span></div><div class="line">        <span class="comment">%% 'DOWN'-message with reason noproc.</span></div><div class="line">        <span class="comment">%% If the child should die after the unlink there</span></div><div class="line">        <span class="comment">%% will be a 'DOWN'-message with a correct reason</span></div><div class="line">        <span class="comment">%% that will be handled in shutdown/2.</span></div><div class="line">        ok</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">terminate_dynamic_children</span><span class="params">(Child, Dynamics, SupName)</span> -&gt;</span></div><div class="line">    &#123;Pids, EStack0&#125; = monitor_dynamic_children(Child, Dynamics),</div><div class="line">    Sz = ?SETS:size(Pids),</div><div class="line">    EStack = <span class="keyword">case</span> Child#child.shutdown <span class="keyword">of</span></div><div class="line">                 brutal_kill -&gt;</div><div class="line">                     ?SETS:fold(<span class="keyword">fun</span>(P, _) -&gt; exit(P, kill) <span class="keyword">end</span>, ok, Pids),</div><div class="line">                     wait_dynamic_children(Child, Pids, Sz, undefined, EStack0);</div><div class="line">                 infinity -&gt;</div><div class="line">                     ?SETS:fold(<span class="keyword">fun</span>(P, _) -&gt; exit(P, shutdown) <span class="keyword">end</span>, ok, Pids),</div><div class="line">                     wait_dynamic_children(Child, Pids, Sz, undefined, EStack0);</div><div class="line">                 Time -&gt;</div><div class="line">                     ?SETS:fold(<span class="keyword">fun</span>(P, _) -&gt; exit(P, shutdown) <span class="keyword">end</span>, ok, Pids),</div><div class="line">                     TRef = erlang:start_timer(Time, self(), kill),</div><div class="line">                     wait_dynamic_children(Child, Pids, Sz, TRef, EStack0)</div><div class="line">             <span class="keyword">end</span>,</div><div class="line">    <span class="comment">%% Unroll stacked errors and report them</span></div><div class="line">    ?DICT:fold(<span class="keyword">fun</span>(Reason, Ls, _) -&gt;</div><div class="line">                       report_error(shutdown_error, Reason,</div><div class="line">                                    Child#child&#123;pid=Ls&#125;, SupName)</div><div class="line">               <span class="keyword">end</span>, ok, EStack).</div><div class="line"><span class="function"><span class="title">monitor_dynamic_children</span><span class="params">(#child&#123;restart_type=temporary&#125;, Dynamics)</span> -&gt;</span></div><div class="line">    ?SETS:fold(<span class="keyword">fun</span>(P, &#123;Pids, EStack&#125;) -&gt;</div><div class="line">                       <span class="keyword">case</span> monitor_child(P) <span class="keyword">of</span></div><div class="line">                           ok -&gt;</div><div class="line">                               &#123;?SETS:add_element(P, Pids), EStack&#125;;</div><div class="line">                           &#123;error, normal&#125; -&gt;</div><div class="line">                               &#123;Pids, EStack&#125;;</div><div class="line">                           &#123;error, Reason&#125; -&gt;</div><div class="line">                               &#123;Pids, ?DICT:append(Reason, P, EStack)&#125;</div><div class="line">                       <span class="keyword">end</span></div><div class="line">               <span class="keyword">end</span>, &#123;?SETS:new(), ?DICT:new()&#125;, Dynamics);</div><div class="line"><span class="function"><span class="title">monitor_dynamic_children</span><span class="params">(#child&#123;restart_type=RType&#125;, Dynamics)</span> -&gt;</span></div><div class="line">    ?DICT:fold(<span class="keyword">fun</span>(P, _, &#123;Pids, EStack&#125;) <span class="keyword">when</span> is_pid(P) -&gt;</div><div class="line">                       <span class="keyword">case</span> monitor_child(P) <span class="keyword">of</span></div><div class="line">                           ok -&gt;</div><div class="line">                               &#123;?SETS:add_element(P, Pids), EStack&#125;;</div><div class="line">                           &#123;error, normal&#125; <span class="keyword">when</span> RType =/= permanent -&gt;</div><div class="line">                               &#123;Pids, EStack&#125;;</div><div class="line">                           &#123;error, Reason&#125; -&gt;</div><div class="line">                               &#123;Pids, ?DICT:append(Reason, P, EStack)&#125;</div><div class="line">                       <span class="keyword">end</span>;</div><div class="line">          (?restarting(_), _, &#123;Pids, EStack&#125;) -&gt;</div><div class="line">               &#123;Pids, EStack&#125;</div><div class="line">               <span class="keyword">end</span>, &#123;?SETS:new(), ?DICT:new()&#125;, Dynamics).</div><div class="line"><span class="function"><span class="title">wait_dynamic_children</span><span class="params">(_Child, _Pids, <span class="number">0</span>, undefined, EStack)</span> -&gt;</span></div><div class="line">    EStack;</div><div class="line"><span class="function"><span class="title">wait_dynamic_children</span><span class="params">(_Child, _Pids, <span class="number">0</span>, TRef, EStack)</span> -&gt;</span></div><div class="line">    <span class="comment">%% If the timer has expired before its cancellation, we must empty the</span></div><div class="line">    <span class="comment">%% mail-box of the 'timeout'-message.</span></div><div class="line">    erlang:cancel_timer(TRef),</div><div class="line">    <span class="keyword">receive</span></div><div class="line">        &#123;timeout, TRef, kill&#125; -&gt;</div><div class="line">            EStack</div><div class="line">    <span class="keyword">after</span> <span class="number">0</span> -&gt;</div><div class="line">            EStack</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">wait_dynamic_children</span><span class="params">(#child&#123;shutdown=brutal_kill&#125; = Child, Pids, Sz,</span></span></div><div class="line">                      TRef, EStack) -&gt;</div><div class="line">    <span class="keyword">receive</span></div><div class="line">        &#123;'DOWN', _MRef, process, Pid, killed&#125; -&gt;</div><div class="line">            wait_dynamic_children(Child, ?SETS:del_element(Pid, Pids), Sz-<span class="number">1</span>,</div><div class="line">                                  TRef, EStack);</div><div class="line"></div><div class="line">        &#123;'DOWN', _MRef, process, Pid, Reason&#125; -&gt;</div><div class="line">            wait_dynamic_children(Child, ?SETS:del_element(Pid, Pids), Sz-<span class="number">1</span>,</div><div class="line">                                  TRef, ?DICT:append(Reason, Pid, EStack))</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">wait_dynamic_children</span><span class="params">(#child&#123;restart_type=RType&#125; = Child, Pids, Sz,</span></span></div><div class="line">                      TRef, EStack) -&gt;</div><div class="line">    <span class="keyword">receive</span></div><div class="line">        &#123;'DOWN', _MRef, process, Pid, shutdown&#125; -&gt;</div><div class="line">            wait_dynamic_children(Child, ?SETS:del_element(Pid, Pids), Sz-<span class="number">1</span>,</div><div class="line">                                  TRef, EStack);</div><div class="line"></div><div class="line">        &#123;'DOWN', _MRef, process, Pid, normal&#125; <span class="keyword">when</span> RType =/= permanent -&gt;</div><div class="line">            wait_dynamic_children(Child, ?SETS:del_element(Pid, Pids), Sz-<span class="number">1</span>,</div><div class="line">                                  TRef, EStack);</div><div class="line"></div><div class="line">        &#123;'DOWN', _MRef, process, Pid, Reason&#125; -&gt;</div><div class="line">            wait_dynamic_children(Child, ?SETS:del_element(Pid, Pids), Sz-<span class="number">1</span>,</div><div class="line">                                  TRef, ?DICT:append(Reason, Pid, EStack));</div><div class="line"></div><div class="line">        &#123;timeout, TRef, kill&#125; -&gt;</div><div class="line">            ?SETS:fold(<span class="keyword">fun</span>(P, _) -&gt; exit(P, kill) <span class="keyword">end</span>, ok, Pids),</div><div class="line">            wait_dynamic_children(Child, Pids, Sz-<span class="number">1</span>, undefined, EStack) <span class="comment">% bug，这里的Sz不应该减一，查看最新版本19.3已经修改过。</span></div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure></p>
+<h3 id="start-child-2-restart-child-2"><a href="#start-child-2-restart-child-2" class="headerlink" title="start_child/2;restart_child/2"></a>start_child/2;restart_child/2</h3><p>start_child/2启动子进程时，如果是simple_one_for_one的supervisor，则参数为子进程的启动参数，其他则为子进程描述。子进程启动先判断是否存在，然后启动。restart_child/2不能用来重启supervisor为simple_one_for_one的子进程，首先判断是否子进程是否存在，且为未运行或者未被重启中，然后启动子进程。restart_child/2一般用于通过terminate_child/2结束的非temporary类型的子进程（此类型的在结束时子进程信息会删除）。</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">start_child</span><span class="params">(Supervisor, ChildSpec)</span> -&gt;</span></div><div class="line">    call(Supervisor, &#123;start_child, ChildSpec&#125;).</div><div class="line"><span class="function"><span class="title">restart_child</span><span class="params">(Supervisor, Name)</span> -&gt;</span></div><div class="line">    call(Supervisor, &#123;restart_child, Name&#125;).</div><div class="line"></div><div class="line"><span class="function"><span class="title">handle_call</span><span class="params">(&#123;start_child, EArgs&#125;, _From, State)</span> <span class="title">when</span> ?<span class="title">is_simple</span><span class="params">(State)</span> -&gt;</span></div><div class="line">    Child = hd(State#state.children),</div><div class="line">    #child&#123;mfargs = &#123;M, F, A&#125;&#125; = Child,</div><div class="line">    Args = A ++ EArgs,</div><div class="line">    <span class="keyword">case</span> do_start_child_i(M, F, Args) <span class="keyword">of</span></div><div class="line">    &#123;ok, undefined&#125; <span class="keyword">when</span> Child#child.restart_type =:= temporary -&gt;</div><div class="line">        &#123;reply, &#123;ok, undefined&#125;, State&#125;;</div><div class="line">    &#123;ok, Pid&#125; -&gt;</div><div class="line">        NState = save_dynamic_child(Child#child.restart_type, Pid, Args, State),</div><div class="line">        &#123;reply, &#123;ok, Pid&#125;, NState&#125;;</div><div class="line">    &#123;ok, Pid, Extra&#125; -&gt;</div><div class="line">        NState = save_dynamic_child(Child#child.restart_type, Pid, Args, State),</div><div class="line">        &#123;reply, &#123;ok, Pid, Extra&#125;, NState&#125;;</div><div class="line">    What -&gt;</div><div class="line">        &#123;reply, What, State&#125;</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">do_start_child_i</span><span class="params">(M, F, A)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> apply(M, F, A) <span class="keyword">of</span></div><div class="line">    &#123;ok, Pid&#125; <span class="keyword">when</span> is_pid(Pid) -&gt;</div><div class="line">        &#123;ok, Pid&#125;;</div><div class="line">    &#123;ok, Pid, Extra&#125; <span class="keyword">when</span> is_pid(Pid) -&gt;</div><div class="line">        &#123;ok, Pid, Extra&#125;;</div><div class="line">    ignore -&gt;</div><div class="line">        &#123;ok, undefined&#125;;</div><div class="line">    &#123;error, Error&#125; -&gt;</div><div class="line">        &#123;error, Error&#125;;</div><div class="line">    What -&gt;</div><div class="line">        &#123;error, What&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"><span class="function"><span class="title">handle_call</span><span class="params">(&#123;start_child, ChildSpec&#125;, _From, State)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> check_childspec(ChildSpec) <span class="keyword">of</span></div><div class="line">    &#123;ok, Child&#125; -&gt;</div><div class="line">        &#123;Resp, NState&#125; = handle_start_child(Child, State),</div><div class="line">        &#123;reply, Resp, NState&#125;;</div><div class="line">    What -&gt;</div><div class="line">        &#123;reply, &#123;error, What&#125;, State&#125;</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">handle_call</span><span class="params">(&#123;restart_child, Name&#125;, _From, State)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> get_child(Name, State) <span class="keyword">of</span></div><div class="line">    &#123;value, Child&#125; <span class="keyword">when</span> Child#child.pid =:= undefined -&gt;</div><div class="line">        <span class="keyword">case</span> do_start_child(State#state.name, Child) <span class="keyword">of</span></div><div class="line">        &#123;ok, Pid&#125; -&gt;</div><div class="line">            NState = replace_child(Child#child&#123;pid = Pid&#125;, State),</div><div class="line">            &#123;reply, &#123;ok, Pid&#125;, NState&#125;;</div><div class="line">        &#123;ok, Pid, Extra&#125; -&gt;</div><div class="line">            NState = replace_child(Child#child&#123;pid = Pid&#125;, State),</div><div class="line">            &#123;reply, &#123;ok, Pid, Extra&#125;, NState&#125;;</div><div class="line">        Error -&gt;</div><div class="line">            &#123;reply, Error, State&#125;</div><div class="line">        <span class="keyword">end</span>;</div><div class="line">    &#123;value, #child&#123;pid=?restarting(_)&#125;&#125; -&gt;</div><div class="line">        &#123;reply, &#123;error, restarting&#125;, State&#125;;</div><div class="line">    &#123;value, _&#125; -&gt;</div><div class="line">        &#123;reply, &#123;error, running&#125;, State&#125;;</div><div class="line">    _ -&gt;</div><div class="line">        &#123;reply, &#123;error, not_found&#125;, State&#125;</div><div class="line">    <span class="keyword">end</span>;</div><div class="line"><span class="function"><span class="title">handle_start_child</span><span class="params">(Child, State)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> get_child(Child#child.name, State) <span class="keyword">of</span></div><div class="line">    <span class="literal">false</span> -&gt;</div><div class="line">        <span class="keyword">case</span> do_start_child(State#state.name, Child) <span class="keyword">of</span></div><div class="line">        &#123;ok, undefined&#125; <span class="keyword">when</span> Child#child.restart_type =:= temporary -&gt;</div><div class="line">            &#123;&#123;ok, undefined&#125;, State&#125;;</div><div class="line">        &#123;ok, Pid&#125; -&gt;</div><div class="line">            &#123;&#123;ok, Pid&#125;, save_child(Child#child&#123;pid = Pid&#125;, State)&#125;;</div><div class="line">        &#123;ok, Pid, Extra&#125; -&gt;</div><div class="line">            &#123;&#123;ok, Pid, Extra&#125;, save_child(Child#child&#123;pid = Pid&#125;, State)&#125;;</div><div class="line">        &#123;error, What&#125; -&gt;</div><div class="line">            &#123;&#123;error, &#123;What, Child&#125;&#125;, State&#125;</div><div class="line">        <span class="keyword">end</span>;</div><div class="line">    &#123;value, OldChild&#125; <span class="keyword">when</span> is_pid(OldChild#child.pid) -&gt;</div><div class="line">        &#123;&#123;error, &#123;already_started, OldChild#child.pid&#125;&#125;, State&#125;;</div><div class="line">    &#123;value, _OldChild&#125; -&gt;</div><div class="line">        &#123;&#123;error, already_present&#125;, State&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"><span class="function"><span class="title">do_start_child</span><span class="params">(SupName, Child)</span> -&gt;</span></div><div class="line">    #child&#123;mfargs = &#123;M, F, Args&#125;&#125; = Child,</div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> apply(M, F, Args) <span class="keyword">of</span></div><div class="line">    &#123;ok, Pid&#125; <span class="keyword">when</span> is_pid(Pid) -&gt;</div><div class="line">        NChild = Child#child&#123;pid = Pid&#125;,</div><div class="line">        report_progress(NChild, SupName),</div><div class="line">        &#123;ok, Pid&#125;;</div><div class="line">    &#123;ok, Pid, Extra&#125; <span class="keyword">when</span> is_pid(Pid) -&gt;</div><div class="line">        NChild = Child#child&#123;pid = Pid&#125;,</div><div class="line">        report_progress(NChild, SupName),</div><div class="line">        &#123;ok, Pid, Extra&#125;;</div><div class="line">    ignore -&gt;</div><div class="line">        &#123;ok, undefined&#125;;</div><div class="line">    &#123;error, What&#125; -&gt; &#123;error, What&#125;;</div><div class="line">    What -&gt; &#123;error, What&#125;</div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>&emsp;&emsp;supervisor是gen_server行为的进程，通常作为application的监控进程。supervisor根据不同的重启策略，结合子进程的重启类型来管理子进程的重启。为了避免子进程无限重启，supervisor有重启频率限制｛MaxR，MaxT}(一定时间内重启次数)，如果超过了这个设置，supervisor会结束所有子进程，同时自己也退出。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Erlang/" rel="tag"># Erlang</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/Erlang源码学习-application-master/" rel="prev" title="Erlang源码学习--application_master">
+                Erlang源码学习--application_master <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="毛毛大人" />
+          <p class="site-author-name" itemprop="name">毛毛大人</p>
+           
+              <p class="site-description motion-element" itemprop="description">学无止境</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-link-2-start-link-3"><span class="nav-number">2.</span> <span class="nav-text">start_link/2;start_link/3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重启策略"><span class="nav-number">3.</span> <span class="nav-text">重启策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#terminate-2"><span class="nav-number">4.</span> <span class="nav-text">terminate/2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-child-2-restart-child-2"><span class="nav-number">5.</span> <span class="nav-text">start_child/2;restart_child/2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">毛毛大人</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
