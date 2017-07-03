@@ -1,0 +1,737 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Erlang," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="简介&amp;emsp;&amp;emsp;gen_event进程是event handler的管理进程。一个handler对应一个state状态，可动态添加和删除。对于gen_event的每个event，各个handler单独处理，互不影响，互不相关。">
+<meta name="keywords" content="Erlang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Erlang源码学习--gen_event">
+<meta property="og:url" content="https://hengzheng.github.io/2017/Erlang源码学习-gen-event/index.html">
+<meta property="og:site_name" content="充电桩">
+<meta property="og:description" content="简介&amp;emsp;&amp;emsp;gen_event进程是event handler的管理进程。一个handler对应一个state状态，可动态添加和删除。对于gen_event的每个event，各个handler单独处理，互不影响，互不相关。">
+<meta property="og:updated_time" content="2017-07-03T10:46:31.910Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Erlang源码学习--gen_event">
+<meta name="twitter:description" content="简介&amp;emsp;&amp;emsp;gen_event进程是event handler的管理进程。一个handler对应一个state状态，可动态添加和删除。对于gen_event的每个event，各个handler单独处理，互不影响，互不相关。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hengzheng.github.io/2017/Erlang源码学习-gen-event/"/>
+
+
+
+
+
+  <title> Erlang源码学习--gen_event | 充电桩 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">充电桩</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-gen-event/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Erlang源码学习--gen_event
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-03T11:54:02+08:00">
+                2017-07-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Erlang/" itemprop="url" rel="index">
+                    <span itemprop="name">Erlang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;gen_event进程是event handler的管理进程。一个handler对应一个state状态，可动态添加和删除。对于gen_event的每个event，各个handler单独处理，互不影响，互不相关。</p>
+<a id="more"></a>
+<h3 id="回调函数"><a href="#回调函数" class="headerlink" title="回调函数"></a>回调函数</h3><p>gen_event行为的回调函数，也即是gen_event handler模块需要实现的函数。init/1是handler初始化函数，返回state，添加handler或者切换（swap）handler到gen_event时被调用。handle_event/2是handler处理event的回调函数，当gen_event收到notify消息时，各handler调用此函数处理event。handle_call/2是handler处理call的回调函数，当gen_event收到call消息时，回调到指定的handler。handle_info/2是handler处理除notify和call外的其他消息。terminate/2是删除handler时的回调函数，处理handler结束时的工作。code_change/3是系统更新指定handler state的回调函数。</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">-callback init<span class="params">(InitArgs :: term())</span> -&gt;</div><div class="line">    &#123;ok, State :: term<span class="params">()</span>&#125; |</div><div class="line">    &#123;ok, State :: term<span class="params">()</span>, hibernate&#125; |</div><div class="line">    &#123;error, Reason :: term<span class="params">()</span>&#125;.</div><div class="line">-callback handle_event<span class="params">(Event :: term(), State :: term())</span> -&gt;</div><div class="line">    &#123;ok, NewState :: term<span class="params">()</span>&#125; |</div><div class="line">    &#123;ok, NewState :: term<span class="params">()</span>, hibernate&#125; |</div><div class="line">    &#123;swap_handler, Args1 :: term<span class="params">()</span>, NewState :: term<span class="params">()</span>,</div><div class="line">     Handler2 :: <span class="params">(atom() | &#123;atom(), Id :: term()&#125;)</span>, Args2 :: term<span class="params">()</span>&#125; |</div><div class="line">    remove_handler.</div><div class="line">-callback handle_call<span class="params">(Request :: term(), State :: term())</span> -&gt;</div><div class="line">    &#123;ok, Reply :: term<span class="params">()</span>, NewState :: term<span class="params">()</span>&#125; |</div><div class="line">    &#123;ok, Reply :: term<span class="params">()</span>, NewState :: term<span class="params">()</span>, hibernate&#125; |</div><div class="line">    &#123;swap_handler, Reply :: term<span class="params">()</span>, Args1 :: term<span class="params">()</span>, NewState :: term<span class="params">()</span>,</div><div class="line">     Handler2 :: <span class="params">(atom() | &#123;atom(), Id :: term()&#125;)</span>, Args2 :: term<span class="params">()</span>&#125; |</div><div class="line">    &#123;remove_handler, Reply :: term<span class="params">()</span>&#125;.</div><div class="line">-callback handle_info<span class="params">(Info :: term(), State :: term())</span> -&gt;</div><div class="line">    &#123;ok, NewState :: term<span class="params">()</span>&#125; |</div><div class="line">    &#123;ok, NewState :: term<span class="params">()</span>, hibernate&#125; |</div><div class="line">    &#123;swap_handler, Args1 :: term<span class="params">()</span>, NewState :: term<span class="params">()</span>,</div><div class="line">     Handler2 :: <span class="params">(atom() | &#123;atom(), Id :: term()&#125;)</span>, Args2 :: term<span class="params">()</span>&#125; |</div><div class="line">    remove_handler.</div><div class="line">-callback terminate<span class="params">(Args :: (term() | &#123;stop, Reason :: term()&#125; |</span></div><div class="line">                             stop | remove_handler |</div><div class="line">                             &#123;error, &#123;'EXIT', Reason :: term()&#125;&#125; |</div><div class="line">                             &#123;error, term()&#125;),</div><div class="line">                    State :: term<span class="params">()</span>) -&gt;</div><div class="line">    term<span class="params">()</span>.</div><div class="line">-callback code_change<span class="params">(OldVsn :: (term() | &#123;down, term()&#125;)</span>,</div><div class="line">                      State :: term<span class="params">()</span>, Extra :: term<span class="params">()</span>) -&gt;</div><div class="line">    &#123;ok, NewState :: term<span class="params">()</span>&#125;.</div></pre></td></tr></table></figure>
+<h3 id="start-0-1-start-link-0-1"><a href="#start-0-1-start-link-0-1" class="headerlink" title="start/0,1;start_link/0,1"></a>start/0,1;start_link/0,1</h3><p>启动gen_event管理进程，调用gen:start/5,6和gen:start_link/5,6同步启动。start和start_link的区别在于是否跟启动进程link，参数可以指明gen_event进程的注册名。gen回调到init_it/6，设置trap_exit，给启动进程返回当前进程的pid，然后进入主循环loop/5，等待消息。start启动的gen_event进程的父进程为进程本身，start_link启动的为启动进程。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">start</span><span class="params">()</span> -&gt;</span></div><div class="line">    gen:start(?MODULE, nolink, ?NO_CALLBACK, [], []).</div><div class="line"><span class="function"><span class="title">start</span><span class="params">(Name)</span> -&gt;</span></div><div class="line">    gen:start(?MODULE, nolink, Name, ?NO_CALLBACK, [], []).</div><div class="line"><span class="function"><span class="title">start_link</span><span class="params">()</span> -&gt;</span></div><div class="line">    gen:start(?MODULE, link, ?NO_CALLBACK, [], []).</div><div class="line"><span class="function"><span class="title">start_link</span><span class="params">(Name)</span> -&gt;</span></div><div class="line">    gen:start(?MODULE, link, Name, ?NO_CALLBACK, [], []).</div><div class="line"></div><div class="line"><span class="function"><span class="title">init_it</span><span class="params">(Starter, self, Name, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    init_it(Starter, self(), Name, Mod, Args, Options);</div><div class="line"><span class="function"><span class="title">init_it</span><span class="params">(Starter, Parent, Name0, _, _, Options)</span> -&gt;</span></div><div class="line">    process_flag(trap_exit, true),</div><div class="line">    Debug = gen:debug_options(Options),</div><div class="line">    proc_lib:init_ack(Starter, &#123;ok, self()&#125;),</div><div class="line">    Name = name(Name0),</div><div class="line">    loop(Parent, Name, [], Debug, false). <span class="comment">% 此时handler为[]</span></div><div class="line"></div><div class="line"><span class="comment">%% handler</span></div><div class="line"><span class="keyword">-record</span><span class="params">(handler, &#123;</span></div><div class="line">        module, <span class="comment">% 回调模块</span></div><div class="line">        id = false, <span class="comment">% 同一回调模块不同的Id识别</span></div><div class="line">        state,  <span class="comment">% 状态</span></div><div class="line">        supervised = false <span class="comment">% sup handler</span></div><div class="line">    &#125;.</div></pre></td></tr></table></figure></p>
+<h3 id="add-handler-3-add-sup-handler-3"><a href="#add-handler-3-add-sup-handler-3" class="headerlink" title="add_handler/3;add_sup_handler/3"></a>add_handler/3;add_sup_handler/3</h3><p>gen_event管理进程添加event handler。调用的是gen:call/4进行同步请求。其中第一个参数M是gen_event管理进程的pid或者是注册名，参数Handler为handler回调模块，参数Args是handler初始化时的参数，即传递给Mod:init/1是参数。其中Handler可以是{Mod, Id}，为了区别同一个回调模块的不同handler。gen_event不限制同名的handler，所以在添加时没有进行handler已有验证。add_handler和add_sup_handler的区别在于是否跟调用添加handler的进程link，同时记录在#handler.supervised中。这里回调Mod:init/1进行初始化工作，返回state，记录到#handler.state。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">add_handler</span><span class="params">(M, Handler, Args)</span> -&gt;</span> rpc(M, &#123;add_handler, Handler, Args&#125;).</div><div class="line"></div><div class="line"><span class="function"><span class="title">add_sup_handler</span><span class="params">(M, Handler, Args)</span>  -&gt;</span></div><div class="line">    rpc(M, &#123;add_sup_handler, Handler, Args, self()&#125;).</div><div class="line"></div><div class="line"><span class="function"><span class="title">rpc</span><span class="params">(M, Cmd)</span> -&gt;</span></div><div class="line">    &#123;ok, Reply&#125; = gen:call(M, self(), Cmd, infinity),</div><div class="line">    Reply.</div><div class="line"></div><div class="line"><span class="function"><span class="title">handle_msg</span><span class="params">(Msg, Parent, ServerName, MSL, Debug)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> Msg <span class="keyword">of</span></div><div class="line">    &#123;From, Tag, &#123;add_handler, Handler, Args&#125;&#125; -&gt;</div><div class="line">        &#123;Hib, Reply, MSL1&#125; = server_add_handler(Handler, Args, MSL),</div><div class="line">        ?reply(Reply),</div><div class="line">        loop(Parent, ServerName, MSL1, Debug, Hib);</div><div class="line">    &#123;From, Tag, &#123;add_sup_handler, Handler, Args, SupP&#125;&#125; -&gt;</div><div class="line">        &#123;Hib, Reply, MSL1&#125; = server_add_sup_handler(Handler, Args, MSL, SupP),</div><div class="line">        ?reply(Reply),</div><div class="line">        loop(Parent, ServerName, MSL1, Debug, Hib);</div><div class="line"></div><div class="line">server_add_handler(&#123;Mod,Id&#125;, Args, MSL) -&gt;</div><div class="line">    Handler = #handler&#123;module = Mod,</div><div class="line">               id = Id&#125;,</div><div class="line">    server_add_handler(Mod, Handler, Args, MSL);</div><div class="line">server_add_handler(Mod, Args, MSL) -&gt;</div><div class="line">    Handler = #handler&#123;module = Mod&#125;,</div><div class="line">    server_add_handler(Mod, Handler, Args, MSL).</div><div class="line"></div><div class="line">server_add_handler(Mod, Handler, Args, MSL) -&gt;</div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> Mod:init(Args) <span class="keyword">of</span></div><div class="line">        &#123;ok, State&#125; -&gt;</div><div class="line">        &#123;false, ok, [Handler#handler&#123;state = State&#125;|MSL]&#125;;</div><div class="line">        &#123;ok, State, hibernate&#125; -&gt;</div><div class="line">        &#123;true, ok, [Handler#handler&#123;state = State&#125;|MSL]&#125;;</div><div class="line">        Other -&gt;</div><div class="line">            &#123;false, Other, MSL&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line">server_add_sup_handler(&#123;Mod,Id&#125;, Args, MSL, Parent) -&gt;</div><div class="line">    link(Parent),</div><div class="line">    Handler = #handler&#123;module = Mod,</div><div class="line">               id = Id,</div><div class="line">               supervised = Parent&#125;,</div><div class="line">    server_add_handler(Mod, Handler, Args, MSL);</div><div class="line">server_add_sup_handler(Mod, Args, MSL, Parent) -&gt;</div><div class="line">    link(Parent),</div><div class="line">    Handler = #handler&#123;module = Mod,</div><div class="line">               supervised = Parent&#125;,</div><div class="line">    server_add_handler(Mod, Handler, Args, MSL).</div></pre></td></tr></table></figure></p>
+<h3 id="notify-2-sync-notify-2"><a href="#notify-2-sync-notify-2" class="headerlink" title="notify/2;sync_notify/2"></a>notify/2;sync_notify/2</h3><p>给gen_event进程的event，也就是发送notify消息。notify为异步消息，sync_notify为同步消息。这里依次对所有的handler回调Mod:handler_event/2，更新handler的状态，如果Mod:handler_event/2返回remove_handler或者是执行出错了，则会handler会退出（调用terminate回调函数），然后从gen_event管理进程删除。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">notify</span><span class="params">(M, Event)</span> -&gt;</span> send(M, &#123;notify, Event&#125;).</div><div class="line"></div><div class="line"><span class="function"><span class="title">sync_notify</span><span class="params">(M, Event)</span> -&gt;</span> rpc(M, &#123;sync_notify, Event&#125;).</div><div class="line"></div><div class="line"><span class="function"><span class="title">send</span><span class="params">(&#123;global, Name&#125;, Cmd)</span> -&gt;</span></div><div class="line">    <span class="keyword">catch</span> global:send(Name, Cmd),</div><div class="line">    ok;</div><div class="line"><span class="function"><span class="title">send</span><span class="params">(&#123;via, Mod, Name&#125;, Cmd)</span> -&gt;</span></div><div class="line">    <span class="keyword">catch</span> Mod:send(Name, Cmd),</div><div class="line">    ok;</div><div class="line"><span class="function"><span class="title">send</span><span class="params">(M, Cmd)</span> -&gt;</span></div><div class="line">    M ! Cmd,</div><div class="line">    ok.</div><div class="line"></div><div class="line"><span class="function"><span class="title">handle_msg</span><span class="params">(Msg, Parent, ServerName, MSL, Debug)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> Msg <span class="keyword">of</span></div><div class="line">    &#123;notify, Event&#125; -&gt;</div><div class="line">        &#123;Hib,MSL1&#125; = server_notify(Event, handle_event, MSL, ServerName),</div><div class="line">        loop(Parent, ServerName, MSL1, Debug, Hib);</div><div class="line">    &#123;From, Tag, &#123;sync_notify, Event&#125;&#125; -&gt;</div><div class="line">        &#123;Hib, MSL1&#125; = server_notify(Event, handle_event, MSL, ServerName),</div><div class="line">        ?reply(ok),</div><div class="line">        loop(Parent, ServerName, MSL1, Debug, Hib);</div><div class="line"></div><div class="line">server_notify(Event, Func, [Handler|T], SName) -&gt;</div><div class="line">    <span class="keyword">case</span> server_update(Handler, Func, Event, SName) <span class="keyword">of</span></div><div class="line">    &#123;ok, Handler1&#125; -&gt;</div><div class="line">        &#123;Hib, NewHandlers&#125; = server_notify(Event, Func, T, SName),</div><div class="line">        &#123;Hib, [Handler1|NewHandlers]&#125;;</div><div class="line">    &#123;hibernate, Handler1&#125; -&gt;</div><div class="line">        &#123;_Hib, NewHandlers&#125; = server_notify(Event, Func, T, SName),</div><div class="line">        &#123;true, [Handler1|NewHandlers]&#125;;</div><div class="line">    no -&gt;</div><div class="line">        server_notify(Event, Func, T, SName)</div><div class="line">    <span class="keyword">end</span>;</div><div class="line">server_notify(_, _, [], _) -&gt;</div><div class="line">    &#123;false, []&#125;.</div><div class="line"></div><div class="line">server_update(Handler1, Func, Event, SName) -&gt;</div><div class="line">    Mod1 = Handler1#handler.module,</div><div class="line">    State = Handler1#handler.state,</div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> Mod1:Func(Event, State) <span class="keyword">of</span></div><div class="line">    &#123;ok, State1&#125; -&gt;</div><div class="line">        &#123;ok, Handler1#handler&#123;state = State1&#125;&#125;;</div><div class="line">    &#123;ok, State1, hibernate&#125; -&gt;</div><div class="line">        &#123;hibernate, Handler1#handler&#123;state = State1&#125;&#125;;</div><div class="line">    &#123;swap_handler, Args1, State1, Handler2, Args2&#125; -&gt;</div><div class="line">        do_swap(Mod1, Handler1, Args1, State1, Handler2, Args2, SName);</div><div class="line">    remove_handler -&gt;</div><div class="line">        do_terminate(Mod1, Handler1, remove_handler, State,</div><div class="line">             remove, SName, normal),</div><div class="line">        no;</div><div class="line">    Other -&gt;</div><div class="line">        do_terminate(Mod1, Handler1, &#123;error, Other&#125;, State,</div><div class="line">             Event, SName, crash),</div><div class="line">        no</div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure></p>
+<h3 id="delete-handler-2"><a href="#delete-handler-2" class="headerlink" title="delete_handler/2"></a>delete_handler/2</h3><p>从gen_event管理进程删除指定的handler。首先从所有的handler中找到最近添加的handler并从列表中删除，然后执行回调函数Mod:terminate/2进行退出工作。如果handler是通过add_sup_handler添加的，则删除时会给添加的进程发删除的通知{gen_event_EXIT, Handler, Reason}。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">delete_handler</span><span class="params">(M, Handler, Args)</span> -&gt;</span> rpc(M, &#123;delete_handler, Handler, Args&#125;).</div><div class="line"></div><div class="line"><span class="function"><span class="title">handle_msg</span><span class="params">(Msg, Parent, ServerName, MSL, Debug)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> Msg <span class="keyword">of</span></div><div class="line">    &#123;From, Tag, &#123;delete_handler, Handler, Args&#125;&#125; -&gt;</div><div class="line">        &#123;Reply, MSL1&#125; = server_delete_handler(Handler, Args, MSL, ServerName),</div><div class="line">        ?reply(Reply),</div><div class="line">        loop(Parent, ServerName, MSL1, Debug, false);</div><div class="line"></div><div class="line">server_delete_handler(HandlerId, Args, MSL, SName) -&gt;</div><div class="line">    <span class="keyword">case</span> split(HandlerId, MSL) <span class="keyword">of</span></div><div class="line">    &#123;Mod, Handler, MSL1&#125; -&gt;</div><div class="line">        &#123;do_terminate(Mod, Handler, Args,</div><div class="line">              Handler#handler.state, delete, SName, normal),</div><div class="line">         MSL1&#125;;</div><div class="line">    error -&gt;</div><div class="line">        &#123;&#123;error, module_not_found&#125;, MSL&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line">do_terminate(Mod, Handler, Args, State, LastIn, SName, Reason) -&gt;</div><div class="line">    Res = (<span class="keyword">catch</span> Mod:terminate(Args, State)),</div><div class="line">    report_terminate(Handler, Reason, Args, State, LastIn, SName, Res),</div><div class="line">    Res.</div><div class="line"></div><div class="line">report_terminate(Handler, crash, &#123;error, Why&#125;, State, LastIn, SName, _) -&gt;</div><div class="line">    report_terminate(Handler, Why, State, LastIn, SName);</div><div class="line">report_terminate(Handler, How, _, State, LastIn, SName, _) -&gt;</div><div class="line">    <span class="comment">%% How == normal | shutdown | &#123;swapped, NewHandler, NewSupervisor&#125;</span></div><div class="line">    report_terminate(Handler, How, State, LastIn, SName).</div><div class="line"></div><div class="line">report_terminate(Handler, Reason, State, LastIn, SName) -&gt;</div><div class="line">    report_error(Handler, Reason, State, LastIn, SName),</div><div class="line">    <span class="keyword">case</span> Handler#handler.supervised <span class="keyword">of</span></div><div class="line">    <span class="literal">false</span> -&gt;</div><div class="line">        ok;</div><div class="line">    Pid -&gt;</div><div class="line">        Pid ! &#123;gen_event_EXIT,handler(Handler),Reason&#125;,</div><div class="line">        ok</div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure></p>
+<h3 id="swap-handler-3-swap-sup-handler-3"><a href="#swap-handler-3-swap-sup-handler-3" class="headerlink" title="swap_handler/3;swap_sup_handler/3"></a>swap_handler/3;swap_sup_handler/3</h3><p>切换gen_event管理进程中的handler，用新的handler代替旧的handler。split_and_terminate/6找到旧的handler并从列表中删除，然后调用do_terminate/7结束旧的handler。然后通过server_add_handler/3或者server_add_sup_handler/4来添加新的handler。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">swap_handler</span><span class="params">(M, &#123;H1, A1&#125;, &#123;H2, A2&#125;)</span> -&gt;</span> rpc(M, &#123;swap_handler, H1, A1, H2, A2&#125;).</div><div class="line"></div><div class="line"><span class="function"><span class="title">swap_sup_handler</span><span class="params">(M, &#123;H1, A1&#125;, &#123;H2, A2&#125;)</span> -&gt;</span></div><div class="line">    rpc(M, &#123;swap_sup_handler, H1, A1, H2, A2, self()&#125;).</div><div class="line"></div><div class="line"><span class="function"><span class="title">handle_msg</span><span class="params">(Msg, Parent, ServerName, MSL, Debug)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> Msg <span class="keyword">of</span></div><div class="line">    &#123;From, Tag, &#123;swap_handler, Handler1, Args1, Handler2, Args2&#125;&#125; -&gt;</div><div class="line">        &#123;Hib, Reply, MSL1&#125; = server_swap_handler(Handler1, Args1, Handler2,</div><div class="line">                             Args2, MSL, ServerName),</div><div class="line">        ?reply(Reply),</div><div class="line">        loop(Parent, ServerName, MSL1, Debug, Hib);</div><div class="line">    &#123;From, Tag, &#123;swap_sup_handler, Handler1, Args1, Handler2, Args2,</div><div class="line">             Sup&#125;&#125; -&gt;</div><div class="line">        &#123;Hib, Reply, MSL1&#125; = server_swap_handler(Handler1, Args1, Handler2,</div><div class="line">                        Args2, MSL, Sup, ServerName),</div><div class="line">        ?reply(Reply),</div><div class="line">        loop(Parent, ServerName, MSL1, Debug, Hib);</div><div class="line"></div><div class="line">server_swap_handler(Handler1, Args1, Handler2, Args2, MSL, SName) -&gt;</div><div class="line">    &#123;State2, Sup, MSL1&#125; = split_and_terminate(Handler1, Args1, MSL,</div><div class="line">                          SName, Handler2, false),</div><div class="line">    <span class="keyword">case</span> s_s_h(Sup, Handler2, &#123;Args2, State2&#125;, MSL1) <span class="keyword">of</span></div><div class="line">    &#123;Hib, ok, MSL2&#125; -&gt;</div><div class="line">        &#123;Hib, ok, MSL2&#125;;</div><div class="line">    &#123;Hib, What, MSL2&#125; -&gt;</div><div class="line">        &#123;Hib, &#123;error, What&#125;, MSL2&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line">server_swap_handler(Handler1, Args1, Handler2, Args2, MSL, Sup, SName) -&gt;</div><div class="line">    &#123;State2, _, MSL1&#125; = split_and_terminate(Handler1, Args1, MSL,</div><div class="line">                        SName, Handler2, Sup),</div><div class="line">    <span class="keyword">case</span> s_s_h(Sup, Handler2, &#123;Args2, State2&#125;, MSL1) <span class="keyword">of</span></div><div class="line">    &#123;Hib, ok, MSL2&#125; -&gt;</div><div class="line">        &#123;Hib, ok, MSL2&#125;;</div><div class="line">    &#123;Hib, What, MSL2&#125; -&gt;</div><div class="line">        &#123;Hib, &#123;error, What&#125;, MSL2&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line">split_and_terminate(HandlerId, Args, MSL, SName, Handler2, Sup) -&gt;</div><div class="line">    <span class="keyword">case</span> split(HandlerId, MSL) <span class="keyword">of</span></div><div class="line">    &#123;Mod, Handler, MSL1&#125; -&gt;</div><div class="line">        OldSup = Handler#handler.supervised,</div><div class="line">        NewSup = <span class="keyword">if</span></div><div class="line">             <span class="keyword">not</span> Sup -&gt; OldSup;</div><div class="line">             <span class="literal">true</span>    -&gt; Sup</div><div class="line">             <span class="keyword">end</span>,</div><div class="line">        &#123;do_terminate(Mod, Handler, Args,</div><div class="line">              Handler#handler.state, swapped, SName,</div><div class="line">              &#123;swapped, Handler2, NewSup&#125;),</div><div class="line">         OldSup,</div><div class="line">         MSL1&#125;;</div><div class="line">    error -&gt;</div><div class="line">            &#123;error, false, MSL&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line">s_s_h(false, Handler, Args, MSL) -&gt;</div><div class="line">    server_add_handler(Handler, Args, MSL);</div><div class="line">s_s_h(Pid, Handler, Args, MSL) -&gt;</div><div class="line">    server_add_sup_handler(Handler, Args, MSL, Pid).</div></pre></td></tr></table></figure></p>
+<h3 id="call-3-4"><a href="#call-3-4" class="headerlink" title="call/3,4"></a>call/3,4</h3><p>gen_event特定handler的同步请求。首先搜索出最近添加的相应handler，然后执行回调函数Mod:handle_call/2返回新的状态，更新所有相应的handler。如果返回的是remove_handler或者执行出错了，则会删除所有相应的handler。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">call</span><span class="params">(M, Handler, Query)</span> -&gt;</span> call1(M, Handler, Query).</div><div class="line"></div><div class="line"><span class="function"><span class="title">call</span><span class="params">(M, Handler, Query, Timeout)</span> -&gt;</span> call1(M, Handler, Query, Timeout).</div><div class="line"></div><div class="line"><span class="function"><span class="title">call1</span><span class="params">(M, Handler, Query)</span> -&gt;</span></div><div class="line">    Cmd = &#123;call, Handler, Query&#125;,</div><div class="line">    <span class="keyword">try</span> gen:call(M, self(), Cmd) <span class="keyword">of</span></div><div class="line">    &#123;ok, Res&#125; -&gt;</div><div class="line">        Res</div><div class="line">    <span class="keyword">catch</span></div><div class="line">    exit:Reason -&gt;</div><div class="line">        exit(&#123;Reason, &#123;?MODULE, call, [M, Handler, Query]&#125;&#125;)</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">call1</span><span class="params">(M, Handler, Query, Timeout)</span> -&gt;</span></div><div class="line">    Cmd = &#123;call, Handler, Query&#125;,</div><div class="line">    <span class="keyword">try</span> gen:call(M, self(), Cmd, Timeout) <span class="keyword">of</span></div><div class="line">    &#123;ok, Res&#125; -&gt;</div><div class="line">        Res</div><div class="line">    <span class="keyword">catch</span></div><div class="line">    exit:Reason -&gt;</div><div class="line">        exit(&#123;Reason, &#123;?MODULE, call, [M, Handler, Query, Timeout]&#125;&#125;)</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">handle_msg</span><span class="params">(Msg, Parent, ServerName, MSL, Debug)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> Msg <span class="keyword">of</span></div><div class="line">    &#123;From, Tag, &#123;call, Handler, Query&#125;&#125; -&gt;</div><div class="line">        &#123;Hib, Reply, MSL1&#125; = server_call(Handler, Query, MSL, ServerName),</div><div class="line">        ?reply(Reply),</div><div class="line">        loop(Parent, ServerName, MSL1, Debug, Hib);</div><div class="line"></div><div class="line">server_call(Handler, Query, MSL, SName) -&gt;</div><div class="line">    <span class="keyword">case</span> search(Handler, MSL) <span class="keyword">of</span></div><div class="line">    &#123;ok, Ha&#125; -&gt;</div><div class="line">        <span class="keyword">case</span> server_call_update(Ha, Query, SName) <span class="keyword">of</span></div><div class="line">        &#123;no, Reply&#125; -&gt;</div><div class="line">            &#123;false, Reply, delete(Handler, MSL)&#125;;</div><div class="line">        &#123;&#123;ok, Ha1&#125;, Reply&#125; -&gt;</div><div class="line">            &#123;false, Reply, replace(Handler, MSL, Ha1)&#125;;</div><div class="line">        &#123;&#123;hibernate, Ha1&#125;, Reply&#125; -&gt;</div><div class="line">            &#123;true, Reply, replace(Handler, MSL, Ha1)&#125;</div><div class="line">        <span class="keyword">end</span>;</div><div class="line">    <span class="literal">false</span> -&gt;</div><div class="line">        &#123;false, &#123;error, bad_module&#125;, MSL&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line">server_call_update(Handler1, Query, SName) -&gt;</div><div class="line">    Mod1 = Handler1#handler.module,</div><div class="line">    State = Handler1#handler.state,</div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> Mod1:handle_call(Query, State) <span class="keyword">of</span></div><div class="line">    &#123;ok, Reply, State1&#125; -&gt;</div><div class="line">        &#123;&#123;ok, Handler1#handler&#123;state = State1&#125;&#125;, Reply&#125;;</div><div class="line">    &#123;ok, Reply, State1, hibernate&#125; -&gt;</div><div class="line">        &#123;&#123;hibernate, Handler1#handler&#123;state = State1&#125;&#125;,</div><div class="line">         Reply&#125;;</div><div class="line">    &#123;swap_handler, Reply, Args1, State1, Handler2, Args2&#125; -&gt;</div><div class="line">        &#123;do_swap(Mod1,Handler1,Args1,State1,Handler2,Args2,SName), Reply&#125;;</div><div class="line">    &#123;remove_handler, Reply&#125; -&gt;</div><div class="line">        do_terminate(Mod1, Handler1, remove_handler, State,</div><div class="line">             remove, SName, normal),</div><div class="line">        &#123;no, Reply&#125;;</div><div class="line">    Other -&gt;</div><div class="line">        do_terminate(Mod1, Handler1, &#123;error, Other&#125;, State,</div><div class="line">             Query, SName, crash),</div><div class="line">        &#123;no, &#123;error, Other&#125;&#125;</div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure></p>
+<h3 id="其他消息"><a href="#其他消息" class="headerlink" title="其他消息"></a>其他消息</h3><p>除call和notify消息外，gen_event管理进程可以处理其他消息。比如which_handlers，get_modules消息等。其中link进程退出消息，可能是某个handler的supervised记录的进程，当收到这个消息时，此类型的handler会退出并删除，同时给其他handler发handle_info消息。而除此之外的其他消息会回调到各handler模块的Mod:handle_info/2函数。</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">handle_msg</span><span class="params">(Msg, Parent, ServerName, MSL, Debug)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> Msg <span class="keyword">of</span></div><div class="line">    &#123;'EXIT', From, Reason&#125; -&gt;</div><div class="line">        MSL1 = handle_exit(From, Reason, MSL, ServerName),</div><div class="line">        loop(Parent, ServerName, MSL1, Debug, false);</div><div class="line">    &#123;From, Tag, which_handlers&#125; -&gt;</div><div class="line">        ?reply(the_handlers(MSL)),</div><div class="line">        loop(Parent, ServerName, MSL, Debug, false);</div><div class="line">    &#123;From, Tag, get_modules&#125; -&gt;</div><div class="line">        ?reply(get_modules(MSL)),</div><div class="line">        loop(Parent, ServerName, MSL, Debug, false);</div><div class="line">    Other  -&gt;</div><div class="line">        &#123;Hib, MSL1&#125; = server_notify(Other, handle_info, MSL, ServerName),</div><div class="line">        loop(Parent, ServerName, MSL1, Debug, Hib)</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">handle_exit</span><span class="params">(From, Reason, MSL, SName)</span> -&gt;</span></div><div class="line">    MSL1 = terminate_supervised(From, Reason, MSL, SName),</div><div class="line">    &#123;_,MSL2&#125;=server_notify(&#123;'EXIT', From, Reason&#125;, handle_info, MSL1, SName),                                                                                    MSL2.</div><div class="line"></div><div class="line"><span class="function"><span class="title">terminate_supervised</span><span class="params">(Pid, Reason, MSL, SName)</span> -&gt;</span></div><div class="line">    F = <span class="keyword">fun</span>(Ha) <span class="keyword">when</span> Ha#handler.supervised =:= Pid -&gt;</div><div class="line">        do_terminate(Ha#handler.module,</div><div class="line">                Ha,</div><div class="line">                &#123;stop,Reason&#125;,</div><div class="line">                Ha#handler.state,</div><div class="line">                &#123;parent_terminated, &#123;Pid,Reason&#125;&#125;,</div><div class="line">                SName,</div><div class="line">                shutdown),</div><div class="line">        <span class="literal">false</span>;</div><div class="line">    (_) -&gt;</div><div class="line">        <span class="literal">true</span></div><div class="line">    <span class="keyword">end</span>,</div><div class="line">    lists:filter(F, MSL).</div></pre></td></tr></table></figure>
+<h3 id="stop-1"><a href="#stop-1" class="headerlink" title="stop/1"></a>stop/1</h3><p>结束gen_event管理进程，如果其父进程退出则gen_event同样会退出。依次结束所有的handler，同时unlink handler中的supervisor进程，不过如果此监督进程是父进程时不执行unlink。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">stop</span><span class="params">(M)</span> -&gt;</span> rpc(M, stop).</div><div class="line"></div><div class="line"><span class="function"><span class="title">handle_msg</span><span class="params">(Msg, Parent, ServerName, MSL, Debug)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> Msg <span class="keyword">of</span></div><div class="line">    &#123;From, Tag, stop&#125; -&gt;</div><div class="line">        <span class="keyword">catch</span> terminate_server(normal, Parent, MSL, ServerName),</div><div class="line">        ?reply(ok);</div><div class="line"></div><div class="line">fetch_msg(Parent, ServerName, MSL, Debug, Hib) -&gt;</div><div class="line">    <span class="keyword">receive</span></div><div class="line">    &#123;'EXIT', Parent, Reason&#125; -&gt;</div><div class="line">        terminate_server(Reason, Parent, MSL, ServerName);</div><div class="line"></div><div class="line">terminate_server(Reason, Parent, MSL, ServerName) -&gt;</div><div class="line">    stop_handlers(MSL, ServerName),</div><div class="line">    do_unlink(Parent, MSL),</div><div class="line">    exit(Reason).</div><div class="line"></div><div class="line"><span class="comment">%% unlink the supervisor process of all supervised handlers.</span></div><div class="line"><span class="comment">%% We do not want a handler supervisor to EXIT due to the</span></div><div class="line"><span class="comment">%% termination of the event manager (server).</span></div><div class="line"><span class="comment">%% Do not unlink Parent !</span></div><div class="line">do_unlink(Parent, MSL) -&gt;</div><div class="line">    lists:foreach(<span class="keyword">fun</span>(Handler) <span class="keyword">when</span> Handler#handler.supervised =:= Parent -&gt;</div><div class="line">              <span class="literal">true</span>;</div><div class="line">             (Handler) <span class="keyword">when</span> is_pid(Handler#handler.supervised) -&gt;</div><div class="line">              unlink(Handler#handler.supervised),</div><div class="line">              <span class="literal">true</span>;</div><div class="line">             (_) -&gt;</div><div class="line">              <span class="literal">true</span></div><div class="line">          <span class="keyword">end</span>,</div><div class="line">          MSL).</div><div class="line"></div><div class="line">stop_handlers([Handler|T], SName) -&gt;</div><div class="line">    Mod = Handler#handler.module,</div><div class="line">    do_terminate(Mod, Handler, stop, Handler#handler.state,</div><div class="line">         stop, SName, shutdown),</div><div class="line">    stop_handlers(T, SName);</div><div class="line">stop_handlers([], _) -&gt;                                                                                                                                          [].</div></pre></td></tr></table></figure></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>&emsp;&emsp;gen_event管理进程主动trap_exit，可以动态添加和删除handler。handler之间互不关联, 互不影响。删除handler时，不主动unlink其的supervisor进程（如果有的话），因为有可能其他的handler需要link同一个进程。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Erlang/" rel="tag"># Erlang</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/Erlang源码学习-gen-server/" rel="prev" title="Erlang源码学习--gen_server">
+                Erlang源码学习--gen_server <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="毛毛大人" />
+          <p class="site-author-name" itemprop="name">毛毛大人</p>
+           
+              <p class="site-description motion-element" itemprop="description">学无止境</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#回调函数"><span class="nav-number">2.</span> <span class="nav-text">回调函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-0-1-start-link-0-1"><span class="nav-number">3.</span> <span class="nav-text">start/0,1;start_link/0,1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#add-handler-3-add-sup-handler-3"><span class="nav-number">4.</span> <span class="nav-text">add_handler/3;add_sup_handler/3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#notify-2-sync-notify-2"><span class="nav-number">5.</span> <span class="nav-text">notify/2;sync_notify/2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#delete-handler-2"><span class="nav-number">6.</span> <span class="nav-text">delete_handler/2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#swap-handler-3-swap-sup-handler-3"><span class="nav-number">7.</span> <span class="nav-text">swap_handler/3;swap_sup_handler/3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#call-3-4"><span class="nav-number">8.</span> <span class="nav-text">call/3,4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他消息"><span class="nav-number">9.</span> <span class="nav-text">其他消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stop-1"><span class="nav-number">10.</span> <span class="nav-text">stop/1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">11.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">毛毛大人</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
