@@ -1,0 +1,731 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Erlang," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="简介&amp;emsp;&amp;emsp;gen_fsm是通用的有限状态机模型，通过event触发不同状态下的事件，然后切换到不同状态和数据。">
+<meta name="keywords" content="Erlang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Erlang源码学习--gen_fsm">
+<meta property="og:url" content="https://hengzheng.github.io/2017/Erlang源码学习-gen-fsm/index.html">
+<meta property="og:site_name" content="充电桩">
+<meta property="og:description" content="简介&amp;emsp;&amp;emsp;gen_fsm是通用的有限状态机模型，通过event触发不同状态下的事件，然后切换到不同状态和数据。">
+<meta property="og:updated_time" content="2017-07-10T09:53:20.152Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Erlang源码学习--gen_fsm">
+<meta name="twitter:description" content="简介&amp;emsp;&amp;emsp;gen_fsm是通用的有限状态机模型，通过event触发不同状态下的事件，然后切换到不同状态和数据。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hengzheng.github.io/2017/Erlang源码学习-gen-fsm/"/>
+
+
+
+
+
+  <title> Erlang源码学习--gen_fsm | 充电桩 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">充电桩</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-gen-fsm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Erlang源码学习--gen_fsm
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-10T10:55:57+08:00">
+                2017-07-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Erlang/" itemprop="url" rel="index">
+                    <span itemprop="name">Erlang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;gen_fsm是通用的有限状态机模型，通过event触发不同状态下的事件，然后切换到不同状态和数据。</p>
+<a id="more"></a>
+<h3 id="回调函数"><a href="#回调函数" class="headerlink" title="回调函数"></a>回调函数</h3><p>init/1是调用start/3,4或者start_link/3,4启动gen_fsm进程时的回调函数，进行进程初始化工作；handle_event/3是send_all_state_event/2的回调函数，通用的事件处理函数；handle_sync_event/3是sync_send_all_state_event/2,3的回调函数，等同于handle_event/3，不过是同步消息，调用进程等待结果返回；handle_info/3是除了异步和同步消息外的其他消息回调函数；terminate/3是gen_fsm进程结束时的回调函数。StateName/2,3是状态变化的回调函数，当收到{‘$gen_event’, Event}或者{‘$gen_event’, From, Event}时的回调函数，是gen_fsm每个状态的函数，有多少个状态就需要实现多少个函数。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">-callback init<span class="params">(Args :: term())</span> -&gt;</div><div class="line">    &#123;ok, StateName :: atom<span class="params">()</span>, StateData :: term<span class="params">()</span>&#125; |</div><div class="line">    &#123;ok, StateName :: atom<span class="params">()</span>, StateData :: term<span class="params">()</span>, timeout<span class="params">()</span> | hibernate&#125; |</div><div class="line">    &#123;stop, Reason :: term<span class="params">()</span>&#125; | ignore.</div><div class="line">-callback handle_event<span class="params">(Event :: term(), StateName :: atom(),</span></div><div class="line">                       StateData :: term()) -&gt;</div><div class="line">    &#123;next_state, NextStateName :: atom<span class="params">()</span>, NewStateData :: term<span class="params">()</span>&#125; |</div><div class="line">    &#123;next_state, NextStateName :: atom<span class="params">()</span>, NewStateData :: term<span class="params">()</span>,</div><div class="line">     timeout<span class="params">()</span> | hibernate&#125; |</div><div class="line">    &#123;stop, Reason :: term<span class="params">()</span>, NewStateData :: term<span class="params">()</span>&#125;.</div><div class="line">-callback handle_sync_event<span class="params">(Event :: term(), From :: &#123;pid(), Tag :: term()&#125;,</span></div><div class="line">                            StateName :: atom(), StateData :: term()) -&gt;</div><div class="line">    &#123;reply, Reply :: term<span class="params">()</span>, NextStateName :: atom<span class="params">()</span>, NewStateData :: term<span class="params">()</span>&#125; |</div><div class="line">    &#123;reply, Reply :: term<span class="params">()</span>, NextStateName :: atom<span class="params">()</span>, NewStateData :: term<span class="params">()</span>,</div><div class="line">     timeout<span class="params">()</span> | hibernate&#125; |</div><div class="line">    &#123;next_state, NextStateName :: atom<span class="params">()</span>, NewStateData :: term<span class="params">()</span>&#125; |</div><div class="line">    &#123;next_state, NextStateName :: atom<span class="params">()</span>, NewStateData :: term<span class="params">()</span>,</div><div class="line">     timeout<span class="params">()</span> | hibernate&#125; |</div><div class="line">    &#123;stop, Reason :: term<span class="params">()</span>, Reply :: term<span class="params">()</span>, NewStateData :: term<span class="params">()</span>&#125; |</div><div class="line">    &#123;stop, Reason :: term<span class="params">()</span>, NewStateData :: term<span class="params">()</span>&#125;.</div><div class="line">-callback handle_info<span class="params">(Info :: term(), StateName :: atom(),</span></div><div class="line">                      StateData :: term()) -&gt;</div><div class="line">    &#123;next_state, NextStateName :: atom<span class="params">()</span>, NewStateData :: term<span class="params">()</span>&#125; |</div><div class="line">    &#123;next_state, NextStateName :: atom<span class="params">()</span>, NewStateData :: term<span class="params">()</span>,</div><div class="line">     timeout<span class="params">()</span> | hibernate&#125; |</div><div class="line">    &#123;stop, Reason :: normal | term<span class="params">()</span>, NewStateData :: term<span class="params">()</span>&#125;.</div><div class="line">-callback terminate<span class="params">(Reason :: normal | shutdown | &#123;shutdown, term()&#125;</span></div><div class="line">            | term(), StateName :: atom(), StateData :: term()) -&gt;</div><div class="line">    term<span class="params">()</span>.</div><div class="line">-callback code_change<span class="params">(OldVsn :: term() | &#123;down, term()&#125;, StateName :: atom(),</span></div><div class="line">              StateData :: term(), Extra :: term()) -&gt;</div><div class="line">    &#123;ok, NextStateName :: atom<span class="params">()</span>, NewStateData :: term<span class="params">()</span>&#125;.</div></pre></td></tr></table></figure></p>
+<h3 id="start-3-4-start-link-3-4"><a href="#start-3-4-start-link-3-4" class="headerlink" title="start/3,4;start_link/3,4"></a>start/3,4;start_link/3,4</h3><p>调用gen/5,6同步启动gen_fsm进程，区别在于start/3,4启动进程不主动和gen_fsm link，start_link则会。gen回调回init_it/6函数，这里回调到gen_fsm的回调函数Mod:init/1进行初始化工作，返回当前StateName和StateData，然后给启动进程返回gen_fsm进程Pid，然后gen_fsm进程loop/7循环，等待消息。gen_fsm没有主动trap_exit，所以最好在init/1回调函数里进行设置。start/3,4启动的gen_fsm的父进程为自己，start_link/3,4的为启动进程。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">start</span><span class="params">(Mod, Args, Options)</span> -&gt;</span></div><div class="line">    gen:start(?MODULE, nolink, Mod, Args, Options).</div><div class="line"></div><div class="line"><span class="function"><span class="title">start</span><span class="params">(Name, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    gen:start(?MODULE, nolink, Name, Mod, Args, Options).</div><div class="line"></div><div class="line"><span class="function"><span class="title">start_link</span><span class="params">(Mod, Args, Options)</span> -&gt;</span></div><div class="line">    gen:start(?MODULE, link, Mod, Args, Options).</div><div class="line"></div><div class="line"><span class="function"><span class="title">start_link</span><span class="params">(Name, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    gen:start(?MODULE, link, Name, Mod, Args, Options).</div><div class="line"></div><div class="line"><span class="function"><span class="title">init_it</span><span class="params">(Starter, self, Name, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    init_it(Starter, self(), Name, Mod, Args, Options);</div><div class="line"><span class="function"><span class="title">init_it</span><span class="params">(Starter, Parent, Name0, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    Name = name(Name0),</div><div class="line">    Debug = gen:debug_options(Options),</div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> Mod:init(Args) <span class="keyword">of</span></div><div class="line">    &#123;ok, StateName, StateData&#125; -&gt;</div><div class="line">        proc_lib:init_ack(Starter, &#123;ok, self()&#125;),</div><div class="line">        loop(Parent, Name, StateName, StateData, Mod, infinity, Debug);</div><div class="line">    &#123;ok, StateName, StateData, Timeout&#125; -&gt;</div><div class="line">        proc_lib:init_ack(Starter, &#123;ok, self()&#125;),</div><div class="line">        loop(Parent, Name, StateName, StateData, Mod, Timeout, Debug);</div><div class="line">    &#123;stop, Reason&#125; -&gt;</div><div class="line">        unregister_name(Name0),</div><div class="line">        proc_lib:init_ack(Starter, &#123;error, Reason&#125;),</div><div class="line">        exit(Reason);</div><div class="line">    ignore -&gt;</div><div class="line">        unregister_name(Name0),</div><div class="line">        proc_lib:init_ack(Starter, ignore),</div><div class="line">        exit(normal);</div><div class="line">    &#123;'EXIT', Reason&#125; -&gt;</div><div class="line">        unregister_name(Name0),</div><div class="line">        proc_lib:init_ack(Starter, &#123;error, Reason&#125;),</div><div class="line">        exit(Reason);</div><div class="line">    Else -&gt;</div><div class="line">        Error = &#123;bad_return_value, Else&#125;,</div><div class="line">        proc_lib:init_ack(Starter, &#123;error, Error&#125;),</div><div class="line">        exit(Error)</div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure></p>
+<h3 id="send-event-2-sync-send-event-2-3"><a href="#send-event-2-sync-send-event-2-3" class="headerlink" title="send_event/2;sync_send_event/2,3"></a>send_event/2;sync_send_event/2,3</h3><p>异步和同步给gen_fsm进程发事件，触发状态变化。gen_fsm进程收到{‘$gen_event’, Event}异步消息后，回调到当前状态的函数Mod:StateName/2函数；收到{‘$gen_event’, From, Event}同步消息后，回调到Mod:StateName/3函数，调用进程则同步等待结果返回。回调函数根据不同的event和StateData，返回不同的状态StateName和数据StateData。如果Mod:StateName/3返回{next_state, …}时，需要在回调函数内显式调用gen_fsm:reply/2给调用sync_send_event/2,3进程回结果，否则sync_send_event/2,3会收到超时消息或者无限等待。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">send_event</span><span class="params">(&#123;global, Name&#125;, Event)</span> -&gt;</span></div><div class="line">    <span class="keyword">catch</span> global:send(Name, &#123;'$gen_event', Event&#125;),</div><div class="line">    ok;</div><div class="line"><span class="function"><span class="title">send_event</span><span class="params">(&#123;via, Mod, Name&#125;, Event)</span> -&gt;</span></div><div class="line">    <span class="keyword">catch</span> Mod:send(Name, &#123;'$gen_event', Event&#125;),</div><div class="line">    ok;</div><div class="line"><span class="function"><span class="title">send_event</span><span class="params">(Name, Event)</span> -&gt;</span></div><div class="line">    Name ! &#123;'$gen_event', Event&#125;,</div><div class="line">    ok.</div><div class="line"><span class="function"><span class="title">sync_send_event</span><span class="params">(Name, Event)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> gen:call(Name, '$gen_sync_event', Event) <span class="keyword">of</span></div><div class="line">    &#123;ok,Res&#125; -&gt;</div><div class="line">        Res;</div><div class="line">    &#123;'EXIT',Reason&#125; -&gt;</div><div class="line">        exit(&#123;Reason, &#123;?MODULE, sync_send_event, [Name, Event]&#125;&#125;)</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">sync_send_event</span><span class="params">(Name, Event, Timeout)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> gen:call(Name, '$gen_sync_event', Event, Timeout) <span class="keyword">of</span></div><div class="line">    &#123;ok,Res&#125; -&gt;</div><div class="line">        Res;</div><div class="line">    &#123;'EXIT',Reason&#125; -&gt;</div><div class="line">        exit(&#123;Reason, &#123;?MODULE, sync_send_event, [Name, Event, Timeout]&#125;&#125;)</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">dispatch</span><span class="params">(&#123;'$gen_event', Event&#125;, Mod, StateName, StateData)</span> -&gt;</span></div><div class="line">    Mod:StateName(Event, StateData);</div><div class="line"><span class="function"><span class="title">dispatch</span><span class="params">(&#123;'$gen_sync_event', From, Event&#125;, Mod, StateName, StateData)</span> -&gt;</span></div><div class="line">    Mod:StateName(Event, From, StateData);</div></pre></td></tr></table></figure></p>
+<h3 id="send-all-state-event-2-sync-send-all-state-event-2-3"><a href="#send-all-state-event-2-sync-send-all-state-event-2-3" class="headerlink" title="send_all_state_event/2;sync_send_all_state_event/2,3"></a>send_all_state_event/2;sync_send_all_state_event/2,3</h3><p>异步和同步给en_fsm进程发通用的事件，触发状态变化。gen_fsm进程收到{‘$gen_all_state_event’， Event}异步消息后，回调到通用的Mod:handle_event/3函数来处理event；收到{‘$gen_sync_all_state_event’, From, Event}同步消息后，回调到Mod:handel_sync_event/3函数，调用进程等待消息返回。相比send_event/2是回调当前状态的函数，通用事件是由handle_event/3统一处理。如果handle_sync_event/3返回{next_state, …}时，需要在回调函数内显式调用gen_fsm:reply/2给调用sync_send_all_state_event/2,3进程回结果，否则sync_send_all_state_event/2,3会收到超时消息或者无限等待。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">send_all_state_event</span><span class="params">(&#123;global, Name&#125;, Event)</span> -&gt;</span></div><div class="line">    <span class="keyword">catch</span> global:send(Name, &#123;'$gen_all_state_event', Event&#125;),</div><div class="line">    ok;</div><div class="line"><span class="function"><span class="title">send_all_state_event</span><span class="params">(&#123;via, Mod, Name&#125;, Event)</span> -&gt;</span></div><div class="line">    <span class="keyword">catch</span> Mod:send(Name, &#123;'$gen_all_state_event', Event&#125;),</div><div class="line">    ok;</div><div class="line"><span class="function"><span class="title">send_all_state_event</span><span class="params">(Name, Event)</span> -&gt;</span></div><div class="line">    Name ! &#123;'$gen_all_state_event', Event&#125;,</div><div class="line">    ok.</div><div class="line"></div><div class="line"><span class="function"><span class="title">sync_send_all_state_event</span><span class="params">(Name, Event)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> gen:call(Name, '$gen_sync_all_state_event', Event) <span class="keyword">of</span></div><div class="line">    &#123;ok,Res&#125; -&gt;</div><div class="line">        Res;</div><div class="line">    &#123;'EXIT',Reason&#125; -&gt;</div><div class="line">        exit(&#123;Reason, &#123;?MODULE, sync_send_all_state_event, [Name, Event]&#125;&#125;)</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">sync_send_all_state_event</span><span class="params">(Name, Event, Timeout)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> gen:call(Name, '$gen_sync_all_state_event', Event, Timeout) <span class="keyword">of</span></div><div class="line">    &#123;ok,Res&#125; -&gt;                                                                                                                                                      Res;</div><div class="line">    &#123;'EXIT',Reason&#125; -&gt;</div><div class="line">        exit(&#123;Reason, &#123;?MODULE, sync_send_all_state_event,</div><div class="line">               [Name, Event, Timeout]&#125;&#125;)</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">dispatch</span><span class="params">(&#123;'$gen_all_state_event', Event&#125;, Mod, StateName, StateData)</span> -&gt;</span></div><div class="line">    Mod:handle_event(Event, StateName, StateData);</div><div class="line"><span class="function"><span class="title">dispatch</span><span class="params">(&#123;'$gen_sync_all_state_event', From, Event&#125;,</span></span></div><div class="line">     Mod, StateName, StateData) -&gt;</div><div class="line">    Mod:handle_sync_event(Event, From, StateName, StateData);</div></pre></td></tr></table></figure></p>
+<h3 id="terminate"><a href="#terminate" class="headerlink" title="terminate"></a>terminate</h3><p>当gen_fsm进程处理消息返回{stop,…}或者处理异常，亦或父进程结束时，gen_fsm进程会关闭，回调到terminate/3函数。由于gen_fsm没有主动trap_exit，所以跟其link进程结束时，也会导致gen_fsm进程结束，而且不会回调terminate/3。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">terminate</span><span class="params">(Reason, Name, Msg, Mod, StateName, StateData, Debug)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> <span class="keyword">catch</span> Mod:terminate(Reason, StateName, StateData) <span class="keyword">of</span></div><div class="line">    &#123;'EXIT', R&#125; -&gt;</div><div class="line">        error_info(R, Name, Msg, StateName, StateData, Debug),</div><div class="line">        exit(R);</div><div class="line">    _ -&gt;</div><div class="line">        <span class="keyword">case</span> Reason <span class="keyword">of</span></div><div class="line">        normal -&gt;</div><div class="line">            exit(normal);</div><div class="line">        shutdown -&gt;</div><div class="line">            exit(shutdown);</div><div class="line">        &#123;shutdown,_&#125;=Shutdown -&gt;</div><div class="line">            exit(Shutdown);</div><div class="line">        _ -&gt;</div><div class="line">                    FmtStateData =</div><div class="line">                        <span class="keyword">case</span> erlang:function_exported(Mod, format_status, <span class="number">2</span>) <span class="keyword">of</span></div><div class="line">                            <span class="literal">true</span> -&gt;</div><div class="line">                                Args = [get(), StateData],</div><div class="line">                                <span class="keyword">case</span> <span class="keyword">catch</span> Mod:format_status(terminate, Args) <span class="keyword">of</span></div><div class="line">                                    &#123;'EXIT', _&#125; -&gt; StateData;</div><div class="line">                                    Else -&gt; Else</div><div class="line">                                <span class="keyword">end</span>;</div><div class="line">                            _ -&gt;</div><div class="line">                                StateData</div><div class="line">                        <span class="keyword">end</span>,</div><div class="line">            error_info(Reason,Name,Msg,StateName,FmtStateData,Debug),</div><div class="line">            exit(Reason)</div><div class="line">        <span class="keyword">end</span></div><div class="line">    <span class="keyword">end</span>.</div></pre></td></tr></table></figure></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>&emsp;&emsp;gen_fsm是通用有限状态机模型进程，通过event触发不同的状态的数据。gen_fsm需要实现不同状态的回调函数，同时不主要trap_exit，在init/1回调函数时主动设置避免link进程结束时导致gen_fsm异常结束，并在handle_info/3加{‘EXIT’, …}匹配来消费此类型消息。gen_fsm回调函数如handle_event/3，StateName/2,3非正常执行，返回异常时也会导致gen_fsm结束。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Erlang/" rel="tag"># Erlang</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/Erlang源码学习-gen-event/" rel="prev" title="Erlang源码学习--gen_event">
+                Erlang源码学习--gen_event <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="毛毛大人" />
+          <p class="site-author-name" itemprop="name">毛毛大人</p>
+           
+              <p class="site-description motion-element" itemprop="description">学无止境</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#回调函数"><span class="nav-number">2.</span> <span class="nav-text">回调函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-3-4-start-link-3-4"><span class="nav-number">3.</span> <span class="nav-text">start/3,4;start_link/3,4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#send-event-2-sync-send-event-2-3"><span class="nav-number">4.</span> <span class="nav-text">send_event/2;sync_send_event/2,3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#send-all-state-event-2-sync-send-all-state-event-2-3"><span class="nav-number">5.</span> <span class="nav-text">send_all_state_event/2;sync_send_all_state_event/2,3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#terminate"><span class="nav-number">6.</span> <span class="nav-text">terminate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">毛毛大人</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
