@@ -1,0 +1,728 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Erlang," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="简介&amp;emsp;&amp;emsp;gen模块为标准行为（gen_server,gen_event,gen_fsm）的启动和同步请求提供通用的接口函数。使用gen启动行为的模块需要实现init_it/6的回调函数。">
+<meta name="keywords" content="Erlang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Erlang源码学习--gen">
+<meta property="og:url" content="https://hengzheng.github.io/2017/Erlang源码学习-gen/index.html">
+<meta property="og:site_name" content="充电桩">
+<meta property="og:description" content="简介&amp;emsp;&amp;emsp;gen模块为标准行为（gen_server,gen_event,gen_fsm）的启动和同步请求提供通用的接口函数。使用gen启动行为的模块需要实现init_it/6的回调函数。">
+<meta property="og:updated_time" content="2017-07-17T07:29:23.741Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Erlang源码学习--gen">
+<meta name="twitter:description" content="简介&amp;emsp;&amp;emsp;gen模块为标准行为（gen_server,gen_event,gen_fsm）的启动和同步请求提供通用的接口函数。使用gen启动行为的模块需要实现init_it/6的回调函数。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hengzheng.github.io/2017/Erlang源码学习-gen/"/>
+
+
+
+
+
+  <title> Erlang源码学习--gen | 充电桩 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">充电桩</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-gen/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Erlang源码学习--gen
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-17T14:24:53+08:00">
+                2017-07-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Erlang/" itemprop="url" rel="index">
+                    <span itemprop="name">Erlang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;gen模块为标准行为（gen_server,gen_event,gen_fsm）的启动和同步请求提供通用的接口函数。使用gen启动行为的模块需要实现init_it/6的回调函数。</p>
+<a id="more"></a>
+<h3 id="start-5-6"><a href="#start-5-6" class="headerlink" title="start/5,6"></a>start/5,6</h3><p>通过调用prob_lib:start/5,prob_lib:start_link/5来同步启动进程。start/5,6的区别在于是否给新启动的进程注册名。其中参数GenMod是gen的回调模块，需要实现init_it/6函数；LinkP是prob_lib:start还是start_link的标识，也即是启动的新进程是否主动和启动它的进程link；Name为新进程注册名方式；Mod是通过gen启动进程的回调模块；Args是Mod回调模块init/1的参数；Options是配置选项列表，比如timeout配置等。prob_lib:start/5,prob_lib:start_link/5参数分别是M,F,A,Timeout, Opts，因为启动新进程执行gen:init_it/7函数，也即是回调到GenMod:init_it/6函数。<br><figure class="highlight erlang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="title">start</span><span class="params">(GenMod, LinkP, Name, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> where(Name) <span class="keyword">of</span></div><div class="line">    undefined -&gt;</div><div class="line">        do_spawn(GenMod, LinkP, Name, Mod, Args, Options);</div><div class="line">    Pid -&gt;</div><div class="line">        &#123;error, &#123;already_started, Pid&#125;&#125;</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"><span class="function"><span class="title">start</span><span class="params">(GenMod, LinkP, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    do_spawn(GenMod, LinkP, Mod, Args, Options).</div><div class="line"></div><div class="line"><span class="function"><span class="title">do_spawn</span><span class="params">(GenMod, link, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    Time = timeout(Options),</div><div class="line">    proc_lib:start_link(?MODULE, init_it,</div><div class="line">            [GenMod, self(), self(), Mod, Args, Options],</div><div class="line">            Time,</div><div class="line">            spawn_opts(Options));</div><div class="line"><span class="function"><span class="title">do_spawn</span><span class="params">(GenMod, _, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    Time = timeout(Options),</div><div class="line">    proc_lib:start(?MODULE, init_it,</div><div class="line">           [GenMod, self(), self, Mod, Args, Options],</div><div class="line">           Time,</div><div class="line">           spawn_opts(Options)).</div><div class="line"></div><div class="line"><span class="function"><span class="title">do_spawn</span><span class="params">(GenMod, link, Name, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    Time = timeout(Options),</div><div class="line">    proc_lib:start_link(?MODULE, init_it,</div><div class="line">            [GenMod, self(), self(), Name, Mod, Args, Options],</div><div class="line">            Time,</div><div class="line">            spawn_opts(Options));</div><div class="line"><span class="function"><span class="title">do_spawn</span><span class="params">(GenMod, _, Name, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    Time = timeout(Options),</div><div class="line">    proc_lib:start(?MODULE, init_it,</div><div class="line">           [GenMod, self(), self, Name, Mod, Args, Options],</div><div class="line">           Time,</div><div class="line">           spawn_opts(Options));</div><div class="line"></div><div class="line"><span class="function"><span class="title">init_it</span><span class="params">(GenMod, Starter, Parent, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    init_it2(GenMod, Starter, Parent, self(), Mod, Args, Options).</div><div class="line"></div><div class="line"><span class="function"><span class="title">init_it</span><span class="params">(GenMod, Starter, Parent, Name, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    <span class="keyword">case</span> name_register(Name) <span class="keyword">of</span></div><div class="line">    <span class="literal">true</span> -&gt;</div><div class="line">        init_it2(GenMod, Starter, Parent, Name, Mod, Args, Options);</div><div class="line">    &#123;false, Pid&#125; -&gt;</div><div class="line">        proc_lib:init_ack(Starter, &#123;error, &#123;already_started, Pid&#125;&#125;)</div><div class="line">    <span class="keyword">end</span>.</div><div class="line"></div><div class="line"><span class="function"><span class="title">init_it2</span><span class="params">(GenMod, Starter, Parent, Name, Mod, Args, Options)</span> -&gt;</span></div><div class="line">    GenMod:init_it(Starter, Parent, Name, Mod, Args, Options).</div></pre></td></tr></table></figure></p>
+<h3 id="call-3-4"><a href="#call-3-4" class="headerlink" title="call/3,4"></a>call/3,4</h3><p>向进程发送同步请求，默认超时时间为5000ms。首先尝试监控需要同步请求消息的进程，因为在同步请求结果返回前，有可能进程就已经退出了，然后同步等级请求结果返回。如果直接监控进程失败了，则尝试监控节点。<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div></pre></td><td class="code"><pre><div class="line">call(Process, Label, Request) -&gt;</div><div class="line">    call(Process, Label, Request, ?default_timeout).</div><div class="line">call(Pid, Label, Request, Timeout)</div><div class="line">  when is_pid(Pid), Timeout =:= infinity;</div><div class="line">       is_pid(Pid), is_integer(Timeout), Timeout &gt;= 0 -&gt;</div><div class="line">    do_call(Pid, Label, Request, Timeout);</div><div class="line">call(Name, Label, Request, Timeout)</div><div class="line">  when is_atom(Name), Timeout =:= infinity;</div><div class="line">       is_atom(Name), is_integer(Timeout), Timeout &gt;= 0 -&gt;</div><div class="line">    case whereis(Name) of</div><div class="line">    Pid when is_pid(Pid) -&gt;</div><div class="line">        do_call(Pid, Label, Request, Timeout);</div><div class="line">    undefined -&gt;</div><div class="line">        exit(noproc)</div><div class="line">    end;</div><div class="line">call(Process, Label, Request, Timeout)</div><div class="line">    when ((tuple_size(Process) == 2 andalso element(1, Process) == global)</div><div class="line">    orelse</div><div class="line">    (tuple_size(Process) == 3 andalso element(1, Process) == via))</div><div class="line">       andalso</div><div class="line">       (Timeout =:= infinity orelse (is_integer(Timeout) andalso Timeout &gt;= 0)) -&gt;</div><div class="line">    case where(Process) of</div><div class="line">    Pid when is_pid(Pid) -&gt;</div><div class="line">        Node = node(Pid),</div><div class="line">        try do_call(Pid, Label, Request, Timeout)</div><div class="line">        catch</div><div class="line">        exit:&#123;nodedown, Node&#125; -&gt;</div><div class="line">            %% A nodedown not yet detected by global,</div><div class="line">            %% pretend that it was.</div><div class="line">            exit(noproc)</div><div class="line">        end;</div><div class="line">    undefined -&gt;</div><div class="line">        exit(noproc)</div><div class="line">    end;</div><div class="line">call(&#123;Name, Node&#125;, Label, Request, Timeout)</div><div class="line">  when Node =:= node(), Timeout =:= infinity;</div><div class="line">        Node =:= node(), is_integer(Timeout), Timeout &gt;= 0 -&gt;</div><div class="line">    call(Name, Label, Request, Timeout);</div><div class="line">call(&#123;_Name, Node&#125;=Process, Label, Request, Timeout)</div><div class="line">  when is_atom(Node), Timeout =:= infinity;</div><div class="line">       is_atom(Node), is_integer(Timeout), Timeout &gt;= 0 -&gt;</div><div class="line">    if</div><div class="line">    node() =:= nonode@nohost -&gt;</div><div class="line">        exit(&#123;nodedown, Node&#125;);</div><div class="line">    true -&gt;</div><div class="line">        do_call(Process, Label, Request, Timeout)</div><div class="line">    end.</div><div class="line">do_call(Process, Label, Request, Timeout) -&gt;</div><div class="line">    try erlang:monitor(process, Process) of</div><div class="line">    Mref -&gt;</div><div class="line">        %% If the monitor/2 call failed to set up a connection to a</div><div class="line">        %% remote node, we don't want the '!' operator to attempt</div><div class="line">        %% to set up the connection again. (If the monitor/2 call</div><div class="line">        %% failed due to an expired timeout, '!' too would probably</div><div class="line">        %% have to wait for the timeout to expire.) Therefore,</div><div class="line">        %% use erlang:send/3 with the 'noconnect' option so that it</div><div class="line">        %% will fail immediately if there is no connection to the</div><div class="line">        %% remote node.</div><div class="line"></div><div class="line">        catch erlang:send(Process, &#123;Label, &#123;self(), Mref&#125;, Request&#125;,</div><div class="line">          [noconnect]),</div><div class="line">        receive</div><div class="line">        &#123;Mref, Reply&#125; -&gt;</div><div class="line">            erlang:demonitor(Mref, [flush]),</div><div class="line">            &#123;ok, Reply&#125;;</div><div class="line">        &#123;'DOWN', Mref, _, _, noconnection&#125; -&gt;</div><div class="line">            Node = get_node(Process),</div><div class="line">            exit(&#123;nodedown, Node&#125;);</div><div class="line">        &#123;'DOWN', Mref, _, _, Reason&#125; -&gt;</div><div class="line">            exit(Reason)</div><div class="line">        after Timeout -&gt;</div><div class="line">            erlang:demonitor(Mref, [flush]),</div><div class="line">            exit(timeout)</div><div class="line">        end</div><div class="line">    catch</div><div class="line">    error:_ -&gt;</div><div class="line">        %% Node (C/Java?) is not supporting the monitor.</div><div class="line">        %% The other possible case -- this node is not distributed</div><div class="line">        %% -- should have been handled earlier.</div><div class="line">        %% Do the best possible with monitor_node/2.</div><div class="line">        %% This code may hang indefinitely if the Process</div><div class="line">        %% does not exist. It is only used for featureweak remote nodes.</div><div class="line">        Node = get_node(Process),</div><div class="line">        monitor_node(Node, true),</div><div class="line">        receive</div><div class="line">        &#123;nodedown, Node&#125; -&gt;</div><div class="line">            monitor_node(Node, false),</div><div class="line">            exit(&#123;nodedown, Node&#125;)</div><div class="line">        after 0 -&gt;</div><div class="line">            Tag = make_ref(),</div><div class="line">            Process ! &#123;Label, &#123;self(), Tag&#125;, Request&#125;,</div><div class="line">            wait_resp(Node, Tag, Timeout)</div><div class="line">        end</div><div class="line">    end.</div></pre></td></tr></table></figure></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>&emsp;&emsp;gen是通用的接口模块，为gen_server，gen_fsm，gen_event标准行为提供同步启动和同步请求消息提供API。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Erlang/" rel="tag"># Erlang</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/Erlang源码学习-gen-fsm/" rel="prev" title="Erlang源码学习--gen_fsm">
+                Erlang源码学习--gen_fsm <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="毛毛大人" />
+          <p class="site-author-name" itemprop="name">毛毛大人</p>
+           
+              <p class="site-description motion-element" itemprop="description">学无止境</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-5-6"><span class="nav-number">2.</span> <span class="nav-text">start/5,6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#call-3-4"><span class="nav-number">3.</span> <span class="nav-text">call/3,4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">毛毛大人</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
