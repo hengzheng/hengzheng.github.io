@@ -270,7 +270,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2019/nsq源码阅读-nsqd启动流程/">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2019/Egret-Engine学习（三）/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="毛毛大人">
@@ -292,8 +292,8 @@
             
               
                 
-                <a class="post-title-link" href="/2019/nsq源码阅读-nsqd启动流程/" itemprop="url">
-                  nsq源码阅读--nsqd启动流程
+                <a class="post-title-link" href="/2019/Egret-Engine学习（三）/" itemprop="url">
+                  Egret Engine学习（三）
                 </a>
               
             
@@ -309,8 +309,574 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-28T15:46:59+08:00">
-                2019-02-28
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-21T15:09:14+08:00">
+                2019-05-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Egret/" itemprop="url" rel="index">
+                    <span itemprop="name">Egret</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;前面学习了Egret Engine的项目配置内容，接下来学习项目的入口程序源码。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/Egret-Engine学习（三）/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2019/Egret-Engine学习（二）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2019/Egret-Engine学习（二）/" itemprop="url">
+                  Egret Engine学习（二）
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-16T16:35:08+08:00">
+                2019-05-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Egret/" itemprop="url" rel="index">
+                    <span itemprop="name">Egret</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;前面学习了Egret Engine的安装和第一个项目的创建、调试运行，现在来学习一下项目目录下的配置文件。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/Egret-Engine学习（二）/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2019/Egret-Engine学习（一）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2019/Egret-Engine学习（一）/" itemprop="url">
+                  Egret Engine学习（一）
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-16T15:01:16+08:00">
+                2019-05-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Egret/" itemprop="url" rel="index">
+                    <span itemprop="name">Egret</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;Egret Engine（白鹭引擎）是遵循HTML5标准的2D、3D引擎。它解决了HTML5性能问题及碎片化问题，灵活地满足开发者开发2D或3D游戏的需求，并有着较强的跨平台运行能力。<br><a href="https://www.egret.com/index">官方地址</a></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/Egret-Engine学习（一）/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2019/《TCP-IP协议详解卷一：协议》笔记/" itemprop="url">
+                  《TCP/IP协议详解卷一：协议》笔记
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-06T14:35:21+08:00">
+                2019-03-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="第1章概述"><a href="#第1章概述" class="headerlink" title="第1章概述"></a>第1章概述</h3><p>1：TCP/IP通常被认为是一个四层协议系统，从上往下依次是应用层，运输层，网络层，链路层。<br><img src="网络协议分层.png" alt="网络协议分层"><br>2：网桥是在链路层上对网络进行互连，而路由器则是在网络层上对网络进行互连。<br>3：网络层IP协议在首部中存入一个长度为8bit的数值，称作协议域。 1表示为ICMP协议，2表示为IGMP协议，6表示为TCP协议，17表示为UDP协议。<br>4：到1992年为止，知名端口号介于1～255之间。256～1023之间的端口号通常都是由Unix系统占用。比如FTP端口号21，Telent端口号23，TFTP端口号69，临时端口分配1024～5000之间的端口号。<br>5：知名端口号奇数的历史原因：NCP（网络控制协议，TCP前身）是单工的，不是全双工的，因此每个应用程序需要两个连接，需预留一对奇数和偶数端口号。<br>6：TCP/IP协议的应用程序通常采用两种应用编程接口（API）：socket和TLI（运输层接口：Transport Layer Interface）。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/《TCP-IP协议详解卷一：协议》笔记/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2019/nsq源码阅读--nsqadmin启动流程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2019/nsq源码阅读--nsqadmin启动流程/" itemprop="url">
+                  nsq源码阅读--nsqadmin启动流程
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-02T16:19:12+08:00">
+                2019-03-02
               </time>
             
 
@@ -368,585 +934,11 @@
 
       
         
-          
-            <h3 id="nsqd启动流程"><a href="#nsqd启动流程" class="headerlink" title="nsqd启动流程"></a>nsqd启动流程</h3><p>&emsp;&emsp;进入到./apps/nsq/目录，可以看到里面有个nsqd.go文件，这个就是nsqd程序的入口代码文件。首先看main函数，很简单，直接调用svc.Run函数启动nsqd。svc.Run函数定义在vendor/github.com/judwhite/go-svc/svc目录下，有windows版本和其他版本，非windows环境下，使用svc_other.go版本。Run函数第一个参数是Service类型的interface，定义在scv.go。Service类型包含3个接口函数，分别是Init,Start和Stop。Run除了第一个参数外，其他参数是可以0-N个os.Signal。Run函数首先通过Init函数根据环境变量进行初始化工作，主要针对windows版本，other版本是默认返回nil。然后调用Start函数启动nsqd程序，通过signal.Notify阻塞主进程，当捕获到相应的中断信号时，主进程继续执行，调用Stop函数进行nqsd程序退出工作。signal.Notify这里设置了syscall.SIGINT（ctrl-c）终止程序中断和syscall.SIGTERM(kill)终止程序信号。</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">// apps/nsqd/nsqd.go</span></div><div class="line"><span class="keyword">type</span> program <span class="keyword">struct</span> &#123;</div><div class="line">    nsqd *nsqd.NSQD</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    prg := &amp;program&#123;&#125;</div><div class="line">    <span class="keyword">if</span> err := svc.Run(prg, syscall.SIGINT, syscall.SIGTERM); err != <span class="literal">nil</span> &#123;</div><div class="line">        log.Fatal(err)</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// vendor/github.com/judwhite/go-svc/svc/svc_other.go</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Run</span><span class="params">(service Service, sig ...os.Signal)</span> <span class="title">error</span></span> &#123;                                                                                                               env := environment&#123;&#125;</div><div class="line">    <span class="keyword">if</span> err := service.Init(env); err != <span class="literal">nil</span> &#123;</div><div class="line">        <span class="keyword">return</span> err</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> err := service.Start(); err != <span class="literal">nil</span> &#123;</div><div class="line">        <span class="keyword">return</span> err</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(sig) == <span class="number">0</span> &#123;</div><div class="line">        sig = []os.Signal&#123;syscall.SIGINT, syscall.SIGTERM&#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    signalChan := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">1</span>)</div><div class="line">    signalNotify(signalChan, sig...)</div><div class="line">    &lt;-signalChan</div><div class="line"></div><div class="line">    <span class="keyword">return</span> service.Stop()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="apps-nsqd-nsqd-Start"><a href="#apps-nsqd-nsqd-Start" class="headerlink" title="apps/nsqd/nsqd.Start"></a>apps/nsqd/nsqd.Start</h3><p>&emsp;&emsp;nsqd主进程通过scv.Run函数调用Start接口函数启动nsqd子进程。Start函数首先做一些加载配置和设置标识的初始化和一些参数检查，然后通过nsqd/nsqd.New创建*NSQD并对数据进行一些初始化赋值的工作，nsqd/nsqd.LoadMetadata加载上次的topics和channels，nsqd/nsqd.PersistMetadata进行topics和channels持久化工作，最后通过调用nsqd/nsqd.Main处理tcp、http、https的服务启动。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">// apps/nsqd/nsqd.go</div><div class="line">func (p *program) Start() error &#123;</div><div class="line">    // 设置flag标识</div><div class="line">    opts := nsqd.NewOptions()</div><div class="line"></div><div class="line">    flagSet := nsqdFlagSet(opts)</div><div class="line">    // 检查Run参数</div><div class="line">    flagSet.Parse(os.Args[1:])</div><div class="line"></div><div class="line">    // 设置随机种子</div><div class="line">    rand.Seed(time.Now().UTC().UnixNano())</div><div class="line"></div><div class="line">    if flagSet.Lookup(&quot;version&quot;).Value.(flag.Getter).Get().(bool) &#123;</div><div class="line">        fmt.Println(version.String(&quot;nsqd&quot;))</div><div class="line">        os.Exit(0)</div><div class="line">    &#125;</div><div class="line">    // 加载配置文件</div><div class="line">    var cfg config</div><div class="line">    configFile := flagSet.Lookup(&quot;config&quot;).Value.String()</div><div class="line">    if configFile != &quot;&quot; &#123;</div><div class="line">        _, err := toml.DecodeFile(configFile, &amp;cfg)</div><div class="line">        if err != nil &#123;</div><div class="line">            log.Fatalf(&quot;ERROR: failed to load config file %s - %s&quot;, configFile, err.Error())</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    // 检查配置</div><div class="line">    cfg.Validate()</div><div class="line"></div><div class="line">    // 合并命令行和配置参数</div><div class="line">    options.Resolve(opts, flagSet, cfg)</div><div class="line"></div><div class="line">    // 创建nsqd</div><div class="line">    nsqd := nsqd.New(opts)</div><div class="line"></div><div class="line">    // 加载上次nsqd上次的topics和channels数据（读文件nsqd.dat）</div><div class="line">    err := nsqd.LoadMetadata()</div><div class="line">    if err != nil &#123;</div><div class="line">        log.Fatalf(&quot;ERROR: %s&quot;, err.Error())</div><div class="line">    &#125;</div><div class="line">    // 持久化topics和channels数据（写文件nsqd.dat）</div><div class="line">    err = nsqd.PersistMetadata()</div><div class="line">    if err != nil &#123;</div><div class="line">        log.Fatalf(&quot;ERROR: failed to persist metadata - %s&quot;, err.Error())</div><div class="line">    &#125;</div><div class="line">    // 启动nsql</div><div class="line">    nsqd.Main()</div><div class="line"></div><div class="line">    p.nsqd = nsqd</div><div class="line">    return nil</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="nsqd-nsqd-Loadmetadata"><a href="#nsqd-nsqd-Loadmetadata" class="headerlink" title="nsqd/nsqd.Loadmetadata"></a>nsqd/nsqd.Loadmetadata</h3><p>&emsp;&emsp;Loadmetadata首先设置isLoading标识，然后读取nsqd.dat文件数据。nsqd.dat数据是json格式保存的，取出Topics数据，然后通过GetTopic函数从NSQD中获取对应名字的topic，如果没有则创建新的topic，并启动topic。如果topic是加载数据时创建的，则GetTopic函数里面先不启动，等加载完topic对应channels后再启动。nsqd/topic.GetChannel函数获取对应名字的channel，如果没有则创建新的channel。新创建topic时，会通过go关键字启动新的协程来执行nsqd/topic.messagePump函数，处理接受到的消息。nsqd/topic.messagePump函数一开始会通过for循环执行select消息，通过调用nsqd/topic.Start后才会进入到消息处理的主循环中。</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">// nsqd/nsqd.go</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *NSQD)</span> <span class="title">LoadMetadata</span><span class="params">()</span> <span class="title">error</span></span> &#123;</div><div class="line">    atomic.StoreInt32(&amp;n.isLoading, <span class="number">1</span>)</div><div class="line">    <span class="keyword">defer</span> atomic.StoreInt32(&amp;n.isLoading, <span class="number">0</span>)</div><div class="line"></div><div class="line">    fn := newMetadataFile(n.getOpts())</div><div class="line"></div><div class="line">    data, err := readOrEmpty(fn)</div><div class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">        <span class="keyword">return</span> err</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> data == <span class="literal">nil</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="literal">nil</span> <span class="comment">// fresh start</span></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">var</span> m meta</div><div class="line">    err = json.Unmarshal(data, &amp;m)</div><div class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">        <span class="keyword">return</span> fmt.Errorf(<span class="string">"failed to parse metadata in %s - %s"</span>, fn, err)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">for</span> _, t := <span class="keyword">range</span> m.Topics &#123;</div><div class="line">        <span class="keyword">if</span> !protocol.IsValidTopicName(t.Name) &#123;</div><div class="line">            n.logf(LOG_WARN, <span class="string">"skipping creation of invalid topic %s"</span>, t.Name)</div><div class="line">            <span class="keyword">continue</span></div><div class="line">        &#125;</div><div class="line">        topic := n.GetTopic(t.Name)</div><div class="line">        <span class="keyword">if</span> t.Paused &#123;</div><div class="line">            topic.Pause()</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">for</span> _, c := <span class="keyword">range</span> t.Channels &#123;</div><div class="line">            <span class="keyword">if</span> !protocol.IsValidChannelName(c.Name) &#123;</div><div class="line">                n.logf(LOG_WARN, <span class="string">"skipping creation of invalid channel %s"</span>, c.Name)</div><div class="line">                <span class="keyword">continue</span></div><div class="line">            &#125;</div><div class="line">            channel := topic.GetChannel(c.Name)</div><div class="line">            <span class="keyword">if</span> c.Paused &#123;</div><div class="line">                channel.Pause()</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        topic.Start()</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// nsqd.dat格式</span></div><div class="line">&#123;<span class="string">"topics"</span>:[&#123;<span class="string">"channels"</span>:[&#123;<span class="string">"name"</span>:<span class="string">"ch"</span>,<span class="string">"paused"</span>:<span class="literal">false</span>&#125;],<span class="string">"name"</span>:<span class="string">"sub_bench"</span>,<span class="string">"paused"</span>:<span class="literal">false</span>&#125;],<span class="string">"version"</span>:<span class="string">"1.1.1-alpha"</span>&#125;</div><div class="line"></div><div class="line"><span class="comment">// nsqd/topic.go</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Topic)</span> <span class="title">messagePump</span><span class="params">()</span></span> &#123;</div><div class="line">    <span class="keyword">var</span> msg *Message</div><div class="line">    <span class="keyword">var</span> buf []<span class="keyword">byte</span></div><div class="line">    <span class="keyword">var</span> err error</div><div class="line">    <span class="keyword">var</span> chans []*Channel</div><div class="line">    <span class="keyword">var</span> memoryMsgChan <span class="keyword">chan</span> *Message</div><div class="line">    <span class="keyword">var</span> backendChan <span class="keyword">chan</span> []<span class="keyword">byte</span></div><div class="line"></div><div class="line">    <span class="comment">// do not pass messages before Start(), but avoid blocking Pause() or GetChannel()</span></div><div class="line">    <span class="keyword">for</span> &#123;</div><div class="line">        <span class="keyword">select</span> &#123;</div><div class="line">        <span class="keyword">case</span> &lt;-t.channelUpdateChan:</div><div class="line">            <span class="keyword">continue</span></div><div class="line">        <span class="keyword">case</span> &lt;-t.pauseChan:</div><div class="line">            <span class="keyword">continue</span></div><div class="line">        <span class="keyword">case</span> &lt;-t.exitChan:</div><div class="line">            <span class="keyword">goto</span> exit</div><div class="line">        <span class="keyword">case</span> &lt;-t.startChan:</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">break</span></div><div class="line">    &#125;</div><div class="line">...</div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Topic)</span> <span class="title">Start</span><span class="params">()</span></span> &#123;</div><div class="line">    <span class="keyword">select</span> &#123;</div><div class="line">    <span class="keyword">case</span> t.startChan &lt;- <span class="number">1</span>:</div><div class="line">    <span class="keyword">default</span>:</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="nsqd-topic-messagePump"><a href="#nsqd-topic-messagePump" class="headerlink" title="nsqd/topic.messagePump"></a>nsqd/topic.messagePump</h3><p>&emsp;&emsp;当nsqd/topic.Start调用后，messagePump进入了消息主循环。消息主循环主要以下消息：<br>1:memoryMsgChan – 内存消息(通过调用nsqd/topic.PutMessage函数写入的数据)<br>2:backendChan – 缓存消息(当memoryMsgChan满的时候，缓存的数据)<br>3:channelUpdateChan – channel更新，比如新增和删除channel<br>4:pauseChan – 暂停消息<br>5:exitChan – 退出消息<br>消息主循环先拿memoryMsgChan里面的消息，如果没有则拿backendChan里面的消息。所以如果消息一旦进入了backendChan，那么会一直等memoryMsgChan的所有消息处理完了，才会从backendChan拿出来处理。topic收到消息的时候，会把消息转发给所有的channels。channels消息处理类似memoryMsgChan，也有对应的memoryMsgChan和backendChan。<br>![nsq-topic-channel.gif]消息流程图</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Topic)</span> <span class="title">messagePump</span><span class="params">()</span></span> &#123;</div><div class="line">    ...</div><div class="line">    <span class="comment">// main message loop</span></div><div class="line">    <span class="keyword">for</span> &#123;</div><div class="line">        <span class="keyword">select</span> &#123;</div><div class="line">        <span class="keyword">case</span> msg = &lt;-memoryMsgChan:</div><div class="line">        <span class="keyword">case</span> buf = &lt;-backendChan:</div><div class="line">            msg, err = decodeMessage(buf)</div><div class="line">            <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">                t.ctx.nsqd.logf(LOG_ERROR, <span class="string">"failed to decode message - %s"</span>, err)</div><div class="line">                <span class="keyword">continue</span></div><div class="line">            &#125;</div><div class="line">        <span class="keyword">case</span> &lt;-t.channelUpdateChan:</div><div class="line">            chans = chans[:<span class="number">0</span>]</div><div class="line">            t.RLock()</div><div class="line">            <span class="keyword">for</span> _, c := <span class="keyword">range</span> t.channelMap &#123;</div><div class="line">                chans = <span class="built_in">append</span>(chans, c)</div><div class="line">            &#125;</div><div class="line">            t.RUnlock()</div><div class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(chans) == <span class="number">0</span> || t.IsPaused() &#123;</div><div class="line">                memoryMsgChan = <span class="literal">nil</span></div><div class="line">                backendChan = <span class="literal">nil</span></div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                memoryMsgChan = t.memoryMsgChan</div><div class="line">                backendChan = t.backend.ReadChan()</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">continue</span></div><div class="line">        <span class="keyword">case</span> &lt;-t.pauseChan:</div><div class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(chans) == <span class="number">0</span> || t.IsPaused() &#123;</div><div class="line">                memoryMsgChan = <span class="literal">nil</span></div><div class="line">                backendChan = <span class="literal">nil</span></div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                memoryMsgChan = t.memoryMsgChan</div><div class="line">                backendChan = t.backend.ReadChan()</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">continue</span></div><div class="line">        <span class="keyword">case</span> &lt;-t.exitChan:</div><div class="line">            <span class="keyword">goto</span> exit</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">for</span> i, channel := <span class="keyword">range</span> chans &#123;</div><div class="line">            chanMsg := msg</div><div class="line">            <span class="comment">// copy the message because each channel</span></div><div class="line">            <span class="comment">// needs a unique instance but...</span></div><div class="line">            <span class="comment">// fastpath to avoid copy if its the first channel</span></div><div class="line">            <span class="comment">// (the topic already created the first copy)</span></div><div class="line">            <span class="keyword">if</span> i &gt; <span class="number">0</span> &#123;</div><div class="line">                chanMsg = NewMessage(msg.ID, msg.Body)</div><div class="line">               chanMsg.Timestamp = msg.Timestamp</div><div class="line">                chanMsg.deferred = msg.deferred</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">if</span> chanMsg.deferred != <span class="number">0</span> &#123;</div><div class="line">                channel.PutMessageDeferred(chanMsg, chanMsg.deferred)</div><div class="line">                <span class="keyword">continue</span></div><div class="line">            &#125;</div><div class="line">            err := channel.PutMessage(chanMsg)</div><div class="line">            <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">                t.ctx.nsqd.logf(LOG_ERROR,</div><div class="line">                    <span class="string">"TOPIC(%s) ERROR: failed to put msg(%s) to channel(%s) - %s"</span>,</div><div class="line">                    t.name, msg.ID, channel.name, err)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">exit:</div><div class="line">    t.ctx.nsqd.logf(LOG_INFO, <span class="string">"TOPIC(%s): closing ... messagePump"</span>, t.name)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="nsqd-nsqd-Main"><a href="#nsqd-nsqd-Main" class="headerlink" title="nsqd/nsqd.Main"></a>nsqd/nsqd.Main</h3><p>&emsp;&emsp;nsqd/nsqd.Main函数启动了nsqd的tcp，http和https服务。tcp服务通过调用protocol.TCPServer函数通过for循环来等待新的tcp链接，代码实现在internal/protocol/tcp_server.go。tcp服务收到client的tcp连接后，通过go启动新的协程来处理client，然后继续等待新的tcp连接。</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">// nsqd/nsqd.go</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n *NSQD)</span> <span class="title">Main</span><span class="params">()</span></span> &#123;</div><div class="line">    <span class="keyword">var</span> err error</div><div class="line">    ctx := &amp;context&#123;n&#125;</div><div class="line"></div><div class="line">    n.tcpListener, err = net.Listen(<span class="string">"tcp"</span>, n.getOpts().TCPAddress)</div><div class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">        n.logf(LOG_FATAL, <span class="string">"listen (%s) failed - %s"</span>, n.getOpts().TCPAddress, err)</div><div class="line">        os.Exit(<span class="number">1</span>)</div><div class="line">    &#125;</div><div class="line">    n.httpListener, err = net.Listen(<span class="string">"tcp"</span>, n.getOpts().HTTPAddress)</div><div class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">        n.logf(LOG_FATAL, <span class="string">"listen (%s) failed - %s"</span>, n.getOpts().HTTPAddress, err)</div><div class="line">        os.Exit(<span class="number">1</span>)</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> n.tlsConfig != <span class="literal">nil</span> &amp;&amp; n.getOpts().HTTPSAddress != <span class="string">""</span> &#123;</div><div class="line">        n.httpsListener, err = tls.Listen(<span class="string">"tcp"</span>, n.getOpts().HTTPSAddress, n.tlsConfig)</div><div class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">            n.logf(LOG_FATAL, <span class="string">"listen (%s) failed - %s"</span>, n.getOpts().HTTPSAddress, err)</div><div class="line">            os.Exit(<span class="number">1</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    tcpServer := &amp;tcpServer&#123;ctx: ctx&#125;</div><div class="line">    n.waitGroup.Wrap(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">        protocol.TCPServer(n.tcpListener, tcpServer, n.logf)</div><div class="line">    &#125;)</div><div class="line">    httpServer := newHTTPServer(ctx, <span class="literal">false</span>, n.getOpts().TLSRequired == TLSRequired)</div><div class="line">    n.waitGroup.Wrap(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">        http_api.Serve(n.httpListener, httpServer, <span class="string">"HTTP"</span>, n.logf)</div><div class="line">    &#125;)</div><div class="line">    <span class="keyword">if</span> n.tlsConfig != <span class="literal">nil</span> &amp;&amp; n.getOpts().HTTPSAddress != <span class="string">""</span> &#123;</div><div class="line">        httpsServer := newHTTPServer(ctx, <span class="literal">true</span>, <span class="literal">true</span>)</div><div class="line">        n.waitGroup.Wrap(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">            http_api.Serve(n.httpsListener, httpsServer, <span class="string">"HTTPS"</span>, n.logf)</div><div class="line">        &#125;)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    n.waitGroup.Wrap(n.queueScanLoop)</div><div class="line">    n.waitGroup.Wrap(n.lookupLoop)</div><div class="line">    <span class="keyword">if</span> n.getOpts().StatsdAddress != <span class="string">""</span> &#123;</div><div class="line">        n.waitGroup.Wrap(n.statsdLoop)</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// internal/protocol/tcp_server.go</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">TCPServer</span><span class="params">(listener net.Listener, handler TCPHandler, logf lg.AppLogFunc)</span></span> &#123;</div><div class="line">    logf(lg.INFO, <span class="string">"TCP: listening on %s"</span>, listener.Addr())</div><div class="line">    <span class="keyword">for</span> &#123;</div><div class="line">        clientConn, err := listener.Accept()</div><div class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">            <span class="keyword">if</span> nerr, ok := err.(net.Error); ok &amp;&amp; nerr.Temporary() &#123;</div><div class="line">                logf(lg.WARN, <span class="string">"temporary Accept() failure - %s"</span>, err)</div><div class="line">                runtime.Gosched()</div><div class="line">                <span class="keyword">continue</span></div><div class="line">            &#125;                                                                                                                                                             <span class="comment">// theres no direct way to detect this error because it is not exposed                                                                                        if !strings.Contains(err.Error(), "use of closed network connection") &#123;</span></div><div class="line">                logf(lg.ERROR, <span class="string">"listener.Accept() - %s"</span>, err)</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">break</span></div><div class="line">        &#125;</div><div class="line">        <span class="keyword">go</span> handler.Handle(clientConn)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    logf(lg.INFO, <span class="string">"TCP: closing %s"</span>, listener.Addr())</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h3><p>&emsp;&emsp;至此，nsqd进程启动完毕。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2019/nsq源码阅读--简介/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="毛毛大人">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="充电桩">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2019/nsq源码阅读--简介/" itemprop="url">
-                  nsq源码阅读--简介
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-28T11:36:47+08:00">
-                2019-02-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/golang/" itemprop="url" rel="index">
-                    <span itemprop="name">golang</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>1：安装golang<br>2：安装git</p>
-<h3 id="nsq-获取"><a href="#nsq-获取" class="headerlink" title="nsq 获取"></a>nsq 获取</h3><p>&emsp;&emsp;通过git来获取nsq，shell中执行如下命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ git clone https://github.com/nsqio/nsq.git</div></pre></td></tr></table></figure></p>
-<h3 id="nsq目录结构"><a href="#nsq目录结构" class="headerlink" title="nsq目录结构"></a>nsq目录结构</h3><p>&emsp;&emsp;通过tree查看目录结构，这个主要有apps，internal，nsqd，nsqlookupd，vendor目录。nsq的主要应用包含在apps目录下；internal是nsq通用的代码；nsqd是nsqd进程代码；nsqadmin是nsqadmin后台管理代码；nsqlookupd是nsq进程管理代码；vendor是第三方库代码。本系列文章，主要是通过对nsqd，nsqdadmin，nsqlookupd这3个进程启动流程进行代码阅读。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">$ tree -d -L 1                                                                                                                                     [15:33</div><div class="line">.</div><div class="line">├── apps</div><div class="line">├── bench</div><div class="line">├── contrib</div><div class="line">├── internal</div><div class="line">├── nsqadmin</div><div class="line">├── nsqd</div><div class="line">├── nsqlookupd</div><div class="line">└── vendor</div><div class="line"></div><div class="line">$ tree ./apps -d -L 1                                                                                                                              [15:34</div><div class="line">./apps</div><div class="line">├── nsqadmin</div><div class="line">├── nsqd</div><div class="line">├── nsqlookupd</div><div class="line">├── nsq_stat</div><div class="line">├── nsq_tail</div><div class="line">├── nsq_to_file</div><div class="line">├── nsq_to_http</div><div class="line">├── nsq_to_nsq</div><div class="line">└── to_nsq</div></pre></td></tr></table></figure></p>
-<h3 id="nsq-编译"><a href="#nsq-编译" class="headerlink" title="nsq 编译"></a>nsq 编译</h3><p>&emsp;&emsp;进入nsq项目目录，执行make命令。可以看到编译了apps对应目录下的代码，进到相应目录可以看到对应.go后缀文件。go build编译时，会自动忽略_test.go结尾的文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$ make                                                                                                                                            [13:54</div><div class="line">go build  -o build/nsqd ./apps/nsqd</div><div class="line">go build  -o build/nsqlookupd ./apps/nsqlookupd</div><div class="line">go build  -o build/nsqadmin ./apps/nsqadmin</div><div class="line">go build  -o build/nsq_to_nsq ./apps/nsq_to_nsq</div><div class="line">go build  -o build/nsq_to_file ./apps/nsq_to_file</div><div class="line">go build  -o build/nsq_to_http ./apps/nsq_to_http</div><div class="line">go build  -o build/nsq_tail ./apps/nsq_tail</div><div class="line">go build  -o build/nsq_stat ./apps/nsq_stat</div><div class="line">go build  -o build/to_nsq ./apps/to_nsqmake</div></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/shell脚本常用记录/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="毛毛大人">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="充电桩">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/shell脚本常用记录/" itemprop="url">
-                  shell脚本常用记录
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-11T11:49:15+08:00">
-                2017-10-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h3 id="bin-bash"><a href="#bin-bash" class="headerlink" title="#!/bin/bash"></a>#!/bin/bash</h3><p>指定解释此脚本的解释器路径。</p>
-<h3 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h3><p>“#”和行尾之间的内容为注释，会被解释器忽略。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">################################</span></div><div class="line"><span class="comment"># @doc</span></div><div class="line"><span class="comment"># @usage</span></div><div class="line"><span class="comment"># @author</span></div><div class="line"><span class="comment"># @data</span></div><div class="line"><span class="comment">################################</span></div></pre></td></tr></table></figure></p>
-<h3 id="echo-printf-可以格式化，类似c语言"><a href="#echo-printf-可以格式化，类似c语言" class="headerlink" title="echo/printf(可以格式化，类似c语言)"></a>echo/printf(可以格式化，类似c语言)</h3><p>标准输出打印。</p>
-<h3 id="echo颜色输出（加-e选项，解释转义）"><a href="#echo颜色输出（加-e选项，解释转义）" class="headerlink" title="echo颜色输出（加-e选项，解释转义）"></a>echo颜色输出（加-e选项，解释转义）</h3><p>\033[0m 关闭所有属性<br>\033[1m 设置高亮度<br>\033[4m 下划线<br>\033[5m 闪烁<br>\033[7m 反显<br>\033[8m 消隐<br>\033[30m – \033[37m 设置前景色 (黑、红、绿、黄、蓝、紫、天蓝、白)<br>\033[40m – \033[47m 设置背景色<br>\033[nA 光标上移n行<br>\033[nB 光标下移n行<br>\033[nC 光标右移n行<br>\033[nD 光标左移n行<br>\033[y;x 设置光标位置<br>\033[2J 清屏<br>\033[K 清除从光标到行尾的内容<br>\033[s 保存光标位置<br>\033[u 恢复光标位置<br>\033[?25l 隐藏光标<br>\033[?25h 显示光标</p>
-<h3 id="read"><a href="#read" class="headerlink" title="read"></a>read</h3><p>标准输入输入。</p>
+          <h3 id="nsqadmin"><a href="#nsqadmin" class="headerlink" title="nsqadmin"></a>nsqadmin</h3><p>&emsp;&emsp;nsqadmin is a Web UI to view aggregated cluster stats in realtime and perform various administrative tasks.</p>
+<h3 id="nsqadmin启动流程"><a href="#nsqadmin启动流程" class="headerlink" title="nsqadmin启动流程"></a>nsqadmin启动流程</h3><p>&emsp;&emsp;进入到apps/nsqadmin/目录，可以看到里面有个main.go文件，这个就是nsqadmin程序的入口代码文件。首先看main函数，简化版的scv.Run函数，首先通过go启动新的协程，通过channel接收阻塞住，如果收到终止信号，则设置退出消息。接着调用nsqadmin/nsqadmin.New创建nsqadmin，然后nsqadmin/nsqadmin.Main函数启动对应的http服务。最后阻塞在exitChan接收结束消息。<br>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/shell脚本常用记录/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-gen/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="毛毛大人">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="充电桩">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/Erlang源码学习-gen/" itemprop="url">
-                  Erlang源码学习--gen
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-17T14:24:53+08:00">
-                2017-07-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Erlang/" itemprop="url" rel="index">
-                    <span itemprop="name">Erlang</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;gen模块为标准行为（gen_server,gen_event,gen_fsm）的启动和同步请求提供通用的接口函数。使用gen启动行为的模块需要实现init_it/6的回调函数。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/Erlang源码学习-gen/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-gen-fsm/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="毛毛大人">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="充电桩">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/Erlang源码学习-gen-fsm/" itemprop="url">
-                  Erlang源码学习--gen_fsm
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-10T10:55:57+08:00">
-                2017-07-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Erlang/" itemprop="url" rel="index">
-                    <span itemprop="name">Erlang</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;gen_fsm是通用的有限状态机模型，通过event触发不同状态下的事件，然后切换到不同状态和数据。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/Erlang源码学习-gen-fsm/#more" rel="contents">
+            <a class="btn" href="/2019/nsq源码阅读--nsqadmin启动流程/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -987,7 +979,7 @@
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1032,7 +1024,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">20</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1043,7 +1035,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1054,7 +1046,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

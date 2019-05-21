@@ -1,0 +1,741 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Egret," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="简介&amp;emsp;&amp;emsp;前面学习了Egret Engine的项目配置内容，接下来学习项目的入口程序源码。">
+<meta name="keywords" content="Egret">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Egret Engine学习（三）">
+<meta property="og:url" content="https://hengzheng.github.io/2019/Egret-Engine学习（三）/index.html">
+<meta property="og:site_name" content="充电桩">
+<meta property="og:description" content="简介&amp;emsp;&amp;emsp;前面学习了Egret Engine的项目配置内容，接下来学习项目的入口程序源码。">
+<meta property="og:image" content="https://hengzheng.github.io/2019/Egret-Engine学习（三）/项目入口程序.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/Egret-Engine学习（三）/加载进度效果.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/Egret-Engine学习（三）/游戏场景效果.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/Egret-Engine学习（三）/按钮点击效果.png">
+<meta property="og:updated_time" content="2019-05-21T09:12:07.907Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Egret Engine学习（三）">
+<meta name="twitter:description" content="简介&amp;emsp;&amp;emsp;前面学习了Egret Engine的项目配置内容，接下来学习项目的入口程序源码。">
+<meta name="twitter:image" content="https://hengzheng.github.io/2019/Egret-Engine学习（三）/项目入口程序.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hengzheng.github.io/2019/Egret-Engine学习（三）/"/>
+
+
+
+
+
+  <title> Egret Engine学习（三） | 充电桩 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">充电桩</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2019/Egret-Engine学习（三）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Egret Engine学习（三）
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-21T15:09:14+08:00">
+                2019-05-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Egret/" itemprop="url" rel="index">
+                    <span itemprop="name">Egret</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;前面学习了Egret Engine的项目配置内容，接下来学习项目的入口程序源码。</p>
+<a id="more"></a>
+<h3 id="Main-ts"><a href="#Main-ts" class="headerlink" title="Main.ts"></a>Main.ts</h3><p>&emsp;&emsp;项目目录下的index.html是项目的第一个页面，里面的<code>div</code>便签的<code>data-entry-class</code>属性指定了程序的入口类<code>Main</code>。这个是默认的类，可以修改成指定的其他类。src目录下存放的TypeScript代码文件，可以很快找到Main.ts，这个就是HelloWorld项目的入口程序。如图：<br><img src="项目入口程序.png" alt="项目入口程序"></p>
+<h4 id="createChildren"><a href="#createChildren" class="headerlink" title="createChildren"></a>createChildren</h4><p>&emsp;&emsp;HelloWorld项目创建时，选的是EUI类型，所以Main类是扩展的eui.UILayer，其他项目类型会有差异，不一一分析。程序启动的时候回调到createChild函数，首先调用父类的同名函数，完成父类组件的初始化工作。接下来是程序生命周期的相关函数，在游戏中，用户可以切换应用的前后台。在用户进入后台时，关闭游戏逻辑、渲染逻辑、背景音乐，可以保证更好的用户体验。然后是注册素材解析器，用于随后游戏素材解析。这里可以使用自定义解析器，也可以用默认的解析器。最后调用runGame函数运行游戏启动的相关逻辑。<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">class</span> Main <span class="keyword">extends</span> eui.UILayer &#123;</div><div class="line"></div><div class="line">    <span class="keyword">protected</span> createChildren(): <span class="built_in">void</span> &#123;</div><div class="line">        <span class="comment">// 父类组件初始化</span></div><div class="line">        <span class="keyword">super</span>.createChildren();</div><div class="line"></div><div class="line">        <span class="comment">// 生命周期相关</span></div><div class="line">        egret.lifecycle.addLifecycleListener(<span class="function">(<span class="params">context</span>) =&gt;</span> &#123;</div><div class="line">                <span class="comment">// custom lifecycle plugin</span></div><div class="line">                <span class="comment">// 自定义相关操作，比如通过监听事件或一定帧数频率来开关渲染和心跳</span></div><div class="line">                &#125;)</div><div class="line"></div><div class="line">        egret.lifecycle.onPause = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</div><div class="line">            <span class="comment">// 进入后台，关掉渲染和心跳</span></div><div class="line">            egret.ticker.pause();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        egret.lifecycle.onResume = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</div><div class="line">            <span class="comment">// 进入前台，打开渲染和心跳</span></div><div class="line">            egret.ticker.resume();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">//inject the custom material parser</span></div><div class="line">        <span class="comment">//注入自定义的素材解析器</span></div><div class="line">        <span class="keyword">let</span> assetAdapter = <span class="keyword">new</span> AssetAdapter();</div><div class="line">        egret.registerImplementation(<span class="string">"eui.IAssetAdapter"</span>, assetAdapter);</div><div class="line">        egret.registerImplementation(<span class="string">"eui.IThemeAdapter"</span>, <span class="keyword">new</span> ThemeAdapter());</div><div class="line"></div><div class="line">        <span class="comment">// 运行游戏</span></div><div class="line">        <span class="keyword">this</span>.runGame().catch(<span class="function"><span class="params">e</span> =&gt;</span> &#123;</div><div class="line">                <span class="built_in">console</span>.log(e);</div><div class="line">                &#125;)</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="runGame"><a href="#runGame" class="headerlink" title="runGame"></a>runGame</h4><p>&emsp;&emsp;createChildren函数前面是一些准备工作，runGame开始进入到游戏启动的真正逻辑。启动过程主要是资源加载和场景创建，后续的其他逻辑需要我们自己完善，才能形成一个完整的游戏项目。<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">async</span> runGame() &#123;</div><div class="line">    <span class="comment">// 加载资源</span></div><div class="line">    <span class="keyword">await</span> <span class="keyword">this</span>.loadResource()</div><div class="line">    <span class="comment">// 创建场景</span></div><div class="line">    <span class="keyword">this</span>.createGameScene();</div><div class="line">    <span class="comment">// 根据配置文件播放动画</span></div><div class="line">    <span class="keyword">const</span> result = <span class="keyword">await</span> RES.getResAsync(<span class="string">"description_json"</span>)</div><div class="line">    <span class="keyword">this</span>.startAnimation(result);</div><div class="line">    <span class="comment">// 平台登录接口，打印登录信息等</span></div><div class="line">    <span class="keyword">await</span> platform.login();</div><div class="line">    <span class="keyword">const</span> userInfo = <span class="keyword">await</span> platform.getUserInfo();</div><div class="line">    <span class="built_in">console</span>.log(userInfo);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h5 id="loadResource"><a href="#loadResource" class="headerlink" title="loadResource"></a>loadResource</h5><p>&emsp;&emsp;加载资源函数，首先创建并在舞台添加一个LoadingUI，用来显示资源加载进度的UI，源码实现在LoadingUI.ts。可以在chrome下试用网速慢的情况下，效果如下图。loadConfig加载资源配置文件，然后loadTheme加载主题配置文件。接着调用loadGroup加载default.res.json配置文件中组名为preload的资源组，加载完成后，删除LoadingUI。<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">async</span> loadResource() &#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">const</span> loadingView = <span class="keyword">new</span> LoadingUI();</div><div class="line">        <span class="keyword">this</span>.stage.addChild(loadingView);</div><div class="line">        <span class="keyword">await</span> RES.loadConfig(<span class="string">"resource/default.res.json"</span>, <span class="string">"resource/"</span>);</div><div class="line">        <span class="keyword">await</span> <span class="keyword">this</span>.loadTheme();</div><div class="line">        <span class="keyword">await</span> RES.loadGroup(<span class="string">"preload"</span>, <span class="number">0</span>, loadingView);</div><div class="line">        <span class="keyword">this</span>.stage.removeChild(loadingView);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">catch</span> (e) &#123;</div><div class="line">        <span class="built_in">console</span>.error(e);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><img src="加载进度效果.png" alt="加载进度效果"></p>
+<h5 id="createGameScene"><a href="#createGameScene" class="headerlink" title="createGameScene"></a>createGameScene</h5><p>&emsp;&emsp;创建游戏场景函数，createBitmapByName函数根据名字创建位图，这里的资源名字是根据前面资源加载的配置文件配置的。游戏场景创建了sky背景位图，topMask矩形框，icon图标位图，line白线，colorLabel文本颜色标签，textfield文本和button按钮这些组件，一个个添加到舞台中。效果如下图：<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 创建场景界面</div><div class="line"> * Create scene interface</div><div class="line"> */</div><div class="line"><span class="keyword">protected</span> createGameScene(): <span class="built_in">void</span> &#123;</div><div class="line">    <span class="keyword">let</span> sky = <span class="keyword">this</span>.createBitmapByName(<span class="string">"bg_jpg"</span>);</div><div class="line">    <span class="keyword">this</span>.addChild(sky);</div><div class="line">    ...</div><div class="line"></div><div class="line">    <span class="keyword">let</span> topMask = <span class="keyword">new</span> egret.Shape();</div><div class="line">    <span class="keyword">this</span>.addChild(topMask);</div><div class="line">    ...</div><div class="line"></div><div class="line">    <span class="keyword">let</span> icon: egret.Bitmap = <span class="keyword">this</span>.createBitmapByName(<span class="string">"egret_icon_png"</span>);</div><div class="line">    <span class="keyword">this</span>.addChild(icon);</div><div class="line">    ...</div><div class="line"></div><div class="line">    <span class="keyword">let</span> line = <span class="keyword">new</span> egret.Shape();</div><div class="line">    <span class="keyword">this</span>.addChild(line);</div><div class="line">    ...</div><div class="line"></div><div class="line"></div><div class="line">    <span class="keyword">let</span> colorLabel = <span class="keyword">new</span> egret.TextField();</div><div class="line">    <span class="keyword">this</span>.addChild(colorLabel);</div><div class="line">    ...</div><div class="line"></div><div class="line">    <span class="keyword">let</span> textfield = <span class="keyword">new</span> egret.TextField();</div><div class="line">    <span class="keyword">this</span>.addChild(textfield);</div><div class="line">    <span class="keyword">this</span>.textfield = textfield;</div><div class="line">    ...</div><div class="line"></div><div class="line">    <span class="keyword">let</span> button = <span class="keyword">new</span> eui.Button();</div><div class="line">    <span class="keyword">this</span>.addChild(button);</div><div class="line">    ...</div><div class="line">    button.addEventListener(egret.TouchEvent.TOUCH_TAP, <span class="keyword">this</span>.onButtonClick, <span class="keyword">this</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><img src="游戏场景效果.png" alt="游戏场景效果"></p>
+<h5 id="startAnimation"><a href="#startAnimation" class="headerlink" title="startAnimation"></a>startAnimation</h5><p>&emsp;&emsp;开始动画函数，在textfield文本组件轮流播放description.json里面配置的文字内容。<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 描述文件加载成功，开始播放动画</div><div class="line"> * Description file loading is successful, start to play the animation</div><div class="line"> */</div><div class="line"><span class="keyword">private</span> startAnimation(result: <span class="built_in">Array</span>&lt;<span class="built_in">any</span>&gt;): <span class="built_in">void</span> &#123;</div><div class="line">    <span class="keyword">let</span> parser = <span class="keyword">new</span> egret.HtmlTextParser();</div><div class="line"></div><div class="line">    <span class="keyword">let</span> textflowArr = result.map(<span class="function"><span class="params">text</span> =&gt;</span> parser.parse(text));</div><div class="line">    <span class="keyword">let</span> textfield = <span class="keyword">this</span>.textfield;</div><div class="line">    <span class="keyword">let</span> count = <span class="number">-1</span>;</div><div class="line">    <span class="keyword">let</span> change = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</div><div class="line">        count++;</div><div class="line">        <span class="keyword">if</span> (count &gt;= textflowArr.length) &#123;</div><div class="line">            count = <span class="number">0</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">let</span> textFlow = textflowArr[count];</div><div class="line"></div><div class="line">        <span class="comment">// 切换描述内容</span></div><div class="line">        <span class="comment">// Switch to described content</span></div><div class="line">        textfield.textFlow = textFlow;</div><div class="line">        <span class="keyword">let</span> tw = egret.Tween.get(textfield);</div><div class="line">        tw.to(&#123; <span class="string">"alpha"</span>: <span class="number">1</span> &#125;, <span class="number">200</span>);</div><div class="line">        tw.wait(<span class="number">2000</span>);</div><div class="line">        tw.to(&#123; <span class="string">"alpha"</span>: <span class="number">0</span> &#125;, <span class="number">200</span>);</div><div class="line">        tw.call(change, <span class="keyword">this</span>);</div><div class="line">    &#125;;</div><div class="line"></div><div class="line">    change();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h5 id="onButtonClick"><a href="#onButtonClick" class="headerlink" title="onButtonClick"></a>onButtonClick</h5><p>&emsp;&emsp;button按钮点击回调函数。场景中的button注册了onButtonClick函数，当点击按钮时，回调这个函数。此函数的作用创建了一个标题为Title的面板。<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 点击按钮</div><div class="line"> * Click the button</div><div class="line"> */</div><div class="line"><span class="keyword">private</span> onButtonClick(e: egret.TouchEvent) &#123;</div><div class="line">    <span class="keyword">let</span> panel = <span class="keyword">new</span> eui.Panel();</div><div class="line">    panel.title = <span class="string">"Title"</span>;</div><div class="line">    panel.horizontalCenter = <span class="number">0</span>;</div><div class="line">    panel.verticalCenter = <span class="number">0</span>;</div><div class="line">    <span class="keyword">this</span>.addChild(panel);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><img src="按钮点击效果.png" alt="按钮点击效果"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>&emsp;&emsp;Main类是HelloWorld项目的程序入口，这个类里实现了资源加载和游戏场景的创建，同时展示了简单的动画效果已经按钮点击效果。接下来，我们可以模仿这个项目流程来实现自己的项目搭建。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Egret/" rel="tag"># Egret</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/Egret-Engine学习（二）/" rel="prev" title="Egret Engine学习（二）">
+                Egret Engine学习（二） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="毛毛大人" />
+          <p class="site-author-name" itemprop="name">毛毛大人</p>
+           
+              <p class="site-description motion-element" itemprop="description">学无止境</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Main-ts"><span class="nav-number">2.</span> <span class="nav-text">Main.ts</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#createChildren"><span class="nav-number">2.1.</span> <span class="nav-text">createChildren</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#runGame"><span class="nav-number">2.2.</span> <span class="nav-text">runGame</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#loadResource"><span class="nav-number">2.2.1.</span> <span class="nav-text">loadResource</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#createGameScene"><span class="nav-number">2.2.2.</span> <span class="nav-text">createGameScene</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#startAnimation"><span class="nav-number">2.2.3.</span> <span class="nav-text">startAnimation</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#onButtonClick"><span class="nav-number">2.2.4.</span> <span class="nav-text">onButtonClick</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">毛毛大人</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

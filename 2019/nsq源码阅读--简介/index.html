@@ -87,17 +87,17 @@
 
 
 
-<meta name="description" content="准备工作1：安装golang2：安装git nsq 获取&amp;emsp;&amp;emsp;通过git来获取nsq，shell中执行如下命令：1$ git clone https://github.com/nsqio/nsq.git nsq目录结构&amp;emsp;&amp;emsp;通过tree查看目录结构，这个主要有apps，internal，nsqd，nsqlookupd，vendor目录。nsq的主要应用包含在ap">
+<meta name="description" content="准备工作1：安装golang2：安装git nsq 获取通过git来获取nsq，shell中执行如下命令： 1$ git clone https://github.com/nsqio/nsq.git">
 <meta name="keywords" content="golang nsq">
 <meta property="og:type" content="article">
 <meta property="og:title" content="nsq源码阅读--简介">
 <meta property="og:url" content="https://hengzheng.github.io/2019/nsq源码阅读--简介/index.html">
 <meta property="og:site_name" content="充电桩">
-<meta property="og:description" content="准备工作1：安装golang2：安装git nsq 获取&amp;emsp;&amp;emsp;通过git来获取nsq，shell中执行如下命令：1$ git clone https://github.com/nsqio/nsq.git nsq目录结构&amp;emsp;&amp;emsp;通过tree查看目录结构，这个主要有apps，internal，nsqd，nsqlookupd，vendor目录。nsq的主要应用包含在ap">
-<meta property="og:updated_time" content="2019-02-28T07:47:32.997Z">
+<meta property="og:description" content="准备工作1：安装golang2：安装git nsq 获取通过git来获取nsq，shell中执行如下命令： 1$ git clone https://github.com/nsqio/nsq.git">
+<meta property="og:updated_time" content="2019-03-01T08:49:36.447Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="nsq源码阅读--简介">
-<meta name="twitter:description" content="准备工作1：安装golang2：安装git nsq 获取&amp;emsp;&amp;emsp;通过git来获取nsq，shell中执行如下命令：1$ git clone https://github.com/nsqio/nsq.git nsq目录结构&amp;emsp;&amp;emsp;通过tree查看目录结构，这个主要有apps，internal，nsqd，nsqlookupd，vendor目录。nsq的主要应用包含在ap">
+<meta name="twitter:description" content="准备工作1：安装golang2：安装git nsq 获取通过git来获取nsq，shell中执行如下命令： 1$ git clone https://github.com/nsqio/nsq.git">
 
 
 
@@ -365,9 +365,13 @@
 
       
         <h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>1：安装golang<br>2：安装git</p>
-<h3 id="nsq-获取"><a href="#nsq-获取" class="headerlink" title="nsq 获取"></a>nsq 获取</h3><p>&emsp;&emsp;通过git来获取nsq，shell中执行如下命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ git clone https://github.com/nsqio/nsq.git</div></pre></td></tr></table></figure></p>
-<h3 id="nsq目录结构"><a href="#nsq目录结构" class="headerlink" title="nsq目录结构"></a>nsq目录结构</h3><p>&emsp;&emsp;通过tree查看目录结构，这个主要有apps，internal，nsqd，nsqlookupd，vendor目录。nsq的主要应用包含在apps目录下；internal是nsq通用的代码；nsqd是nsqd进程代码；nsqadmin是nsqadmin后台管理代码；nsqlookupd是nsq进程管理代码；vendor是第三方库代码。本系列文章，主要是通过对nsqd，nsqdadmin，nsqlookupd这3个进程启动流程进行代码阅读。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">$ tree -d -L 1                                                                                                                                     [15:33</div><div class="line">.</div><div class="line">├── apps</div><div class="line">├── bench</div><div class="line">├── contrib</div><div class="line">├── internal</div><div class="line">├── nsqadmin</div><div class="line">├── nsqd</div><div class="line">├── nsqlookupd</div><div class="line">└── vendor</div><div class="line"></div><div class="line">$ tree ./apps -d -L 1                                                                                                                              [15:34</div><div class="line">./apps</div><div class="line">├── nsqadmin</div><div class="line">├── nsqd</div><div class="line">├── nsqlookupd</div><div class="line">├── nsq_stat</div><div class="line">├── nsq_tail</div><div class="line">├── nsq_to_file</div><div class="line">├── nsq_to_http</div><div class="line">├── nsq_to_nsq</div><div class="line">└── to_nsq</div></pre></td></tr></table></figure></p>
-<h3 id="nsq-编译"><a href="#nsq-编译" class="headerlink" title="nsq 编译"></a>nsq 编译</h3><p>&emsp;&emsp;进入nsq项目目录，执行make命令。可以看到编译了apps对应目录下的代码，进到相应目录可以看到对应.go后缀文件。go build编译时，会自动忽略_test.go结尾的文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$ make                                                                                                                                            [13:54</div><div class="line">go build  -o build/nsqd ./apps/nsqd</div><div class="line">go build  -o build/nsqlookupd ./apps/nsqlookupd</div><div class="line">go build  -o build/nsqadmin ./apps/nsqadmin</div><div class="line">go build  -o build/nsq_to_nsq ./apps/nsq_to_nsq</div><div class="line">go build  -o build/nsq_to_file ./apps/nsq_to_file</div><div class="line">go build  -o build/nsq_to_http ./apps/nsq_to_http</div><div class="line">go build  -o build/nsq_tail ./apps/nsq_tail</div><div class="line">go build  -o build/nsq_stat ./apps/nsq_stat</div><div class="line">go build  -o build/to_nsq ./apps/to_nsqmake</div></pre></td></tr></table></figure></p>
+<h3 id="nsq-获取"><a href="#nsq-获取" class="headerlink" title="nsq 获取"></a>nsq 获取</h3><p>通过git来获取nsq，shell中执行如下命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ git clone https://github.com/nsqio/nsq.git</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<h3 id="nsq目录结构"><a href="#nsq目录结构" class="headerlink" title="nsq目录结构"></a>nsq目录结构</h3><p>&emsp;&emsp;通过tree查看目录结构，这个主要有apps，internal，nsqd，nsqlookupd，vendor目录。nsq的主要应用包含在apps目录下；internal是nsq通用的代码；nsqd是nsqd进程代码；nsqadmin是nsqadmin后台管理代码；nsqlookupd是nsq进程管理代码；vendor是第三方库代码。本系列文章，主要是通过对nsqd，nsqdadmin，nsqlookupd这3个进程启动流程进行代码阅读。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">$ tree -d -L 1</div><div class="line">.</div><div class="line">├── apps</div><div class="line">├── bench</div><div class="line">├── contrib</div><div class="line">├── internal</div><div class="line">├── nsqadmin</div><div class="line">├── nsqd</div><div class="line">├── nsqlookupd</div><div class="line">└── vendor</div><div class="line"></div><div class="line">$ tree ./apps -d -L 1</div><div class="line">./apps</div><div class="line">├── nsqadmin</div><div class="line">├── nsqd</div><div class="line">├── nsqlookupd</div><div class="line">├── nsq_stat</div><div class="line">├── nsq_tail</div><div class="line">├── nsq_to_file</div><div class="line">├── nsq_to_http</div><div class="line">├── nsq_to_nsq</div><div class="line">└── to_nsq</div></pre></td></tr></table></figure>
+<h3 id="nsq-编译"><a href="#nsq-编译" class="headerlink" title="nsq 编译"></a>nsq 编译</h3><p>&emsp;&emsp;进入nsq项目目录，执行make命令。可以看到编译了apps对应目录下的代码，进到相应目录可以看到对应.go后缀文件。go build编译时，会自动忽略_test.go结尾的文件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$ make</div><div class="line">go build  -o build/nsqd ./apps/nsqd</div><div class="line">go build  -o build/nsqlookupd ./apps/nsqlookupd</div><div class="line">go build  -o build/nsqadmin ./apps/nsqadmin</div><div class="line">go build  -o build/nsq_to_nsq ./apps/nsq_to_nsq</div><div class="line">go build  -o build/nsq_to_file ./apps/nsq_to_file</div><div class="line">go build  -o build/nsq_to_http ./apps/nsq_to_http</div><div class="line">go build  -o build/nsq_tail ./apps/nsq_tail</div><div class="line">go build  -o build/nsq_stat ./apps/nsq_stat</div><div class="line">go build  -o build/to_nsq ./apps/to_nsqmake</div></pre></td></tr></table></figure>
 
       
     </div>
@@ -410,7 +414,7 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/nsq源码阅读-nsqd启动流程/" rel="next" title="nsq源码阅读--nsqd启动流程">
+              <a href="/2019/nsq源码阅读--nsqd启动流程/" rel="next" title="nsq源码阅读--nsqd启动流程">
                 <i class="fa fa-chevron-left"></i> nsq源码阅读--nsqd启动流程
               </a>
             
@@ -494,7 +498,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">20</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -505,7 +509,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -516,7 +520,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

@@ -1,0 +1,729 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="笔记," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="第1章概述1：TCP/IP通常被认为是一个四层协议系统，从上往下依次是应用层，运输层，网络层，链路层。2：网桥是在链路层上对网络进行互连，而路由器则是在网络层上对网络进行互连。3：网络层IP协议在首部中存入一个长度为8bit的数值，称作协议域。 1表示为ICMP协议，2表示为IGMP协议，6表示为TCP协议，17表示为UDP协议。4：到1992年为止，知名端口号介于1～255之间。256～1023">
+<meta name="keywords" content="笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《TCP/IP协议详解卷一：协议》笔记">
+<meta property="og:url" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/index.html">
+<meta property="og:site_name" content="充电桩">
+<meta property="og:description" content="第1章概述1：TCP/IP通常被认为是一个四层协议系统，从上往下依次是应用层，运输层，网络层，链路层。2：网桥是在链路层上对网络进行互连，而路由器则是在网络层上对网络进行互连。3：网络层IP协议在首部中存入一个长度为8bit的数值，称作协议域。 1表示为ICMP协议，2表示为IGMP协议，6表示为TCP协议，17表示为UDP协议。4：到1992年为止，知名端口号介于1～255之间。256～1023">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/网络协议分层.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/IP首部.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/ARP分组格式.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/ICMP报文格式.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/ICMP报文类型.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/Ping程序ICMP报文格式.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/IP首部中的记录路由选项的一般格式.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/IP首部中的时间戳选项的格式.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/时间戳选项标志字段.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/ICMP重定向报文的格式.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/ICMP路由器请求报文格式.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/ICMP路由器通告报文格式.png">
+<meta property="og:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/RIP报文格式.png">
+<meta property="og:updated_time" content="2019-05-06T03:16:29.957Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="《TCP/IP协议详解卷一：协议》笔记">
+<meta name="twitter:description" content="第1章概述1：TCP/IP通常被认为是一个四层协议系统，从上往下依次是应用层，运输层，网络层，链路层。2：网桥是在链路层上对网络进行互连，而路由器则是在网络层上对网络进行互连。3：网络层IP协议在首部中存入一个长度为8bit的数值，称作协议域。 1表示为ICMP协议，2表示为IGMP协议，6表示为TCP协议，17表示为UDP协议。4：到1992年为止，知名端口号介于1～255之间。256～1023">
+<meta name="twitter:image" content="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/网络协议分层.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/"/>
+
+
+
+
+
+  <title> 《TCP/IP协议详解卷一：协议》笔记 | 充电桩 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">充电桩</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2019/《TCP-IP协议详解卷一：协议》笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                《TCP/IP协议详解卷一：协议》笔记
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-06T14:35:21+08:00">
+                2019-03-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="第1章概述"><a href="#第1章概述" class="headerlink" title="第1章概述"></a>第1章概述</h3><p>1：TCP/IP通常被认为是一个四层协议系统，从上往下依次是应用层，运输层，网络层，链路层。<br><img src="网络协议分层.png" alt="网络协议分层"><br>2：网桥是在链路层上对网络进行互连，而路由器则是在网络层上对网络进行互连。<br>3：网络层IP协议在首部中存入一个长度为8bit的数值，称作协议域。 1表示为ICMP协议，2表示为IGMP协议，6表示为TCP协议，17表示为UDP协议。<br>4：到1992年为止，知名端口号介于1～255之间。256～1023之间的端口号通常都是由Unix系统占用。比如FTP端口号21，Telent端口号23，TFTP端口号69，临时端口分配1024～5000之间的端口号。<br>5：知名端口号奇数的历史原因：NCP（网络控制协议，TCP前身）是单工的，不是全双工的，因此每个应用程序需要两个连接，需预留一对奇数和偶数端口号。<br>6：TCP/IP协议的应用程序通常采用两种应用编程接口（API）：socket和TLI（运输层接口：Transport Layer Interface）。</p>
+<a id="more"></a>
+<h3 id="第3章IP：网际协议"><a href="#第3章IP：网际协议" class="headerlink" title="第3章IP：网际协议"></a>第3章IP：网际协议</h3><p>1：IP数据报格式：<br><img src="IP首部.png" alt="IP数据报格式.png"><br>2：IP首部长度指的是首部以32bit（4字节）为单位的的数目。4bit能表示（0-15）最大数是15，首部最长为60个字节。普通IP数据报（没有任何选择项）字段的值是5。<br>3：IP数据报总长度以8bit（1字节）为长度，包含首部长度和数据长度。<br>4：IP首部始终是32bit（4字节）的整数倍。<br>5：IP首部网络字节序格式为big endian。</p>
+<h3 id="第4章ARP-地址解析协议"><a href="#第4章ARP-地址解析协议" class="headerlink" title="第4章ARP:地址解析协议"></a>第4章ARP:地址解析协议</h3><p>1：ARP为IP地址到对应的硬件地址之间提供动态映射。<br>2：ARP的分组格式：<br><img src="ARP分组格式.png" alt="ARP分组格式"><br>3：以太网目的地址为全1的特殊地址是广播地址，电缆上的所有以太网接口（网卡）都要接收广播的数据帧。<br>4：帧类型值为0x0806代表后面的数据是ARP请求或应答；硬件类型值为 1即表示以太网地址；协议类型值为0x0800即表示IP地址；硬件地址和协议地址的长度，以字节为单位，对于以太网上IP地址的ARP请求或应答来说，它们的值分别为6和4。<br>5：操作字段值为1表示ARP请求；2表示ARP应答；3表示RARP请求；4表示RARP应答。<br>6：免费ARP (gratuitous ARP)：主机发送ARP查找自己的I P地址，通常发生在系统引导期间进行接口配置的时候。作用：确定另一个主机是否设置了相同的IP地址；更新其他主机的ARP高速缓存相应IP地址的硬件地址。</p>
+<h3 id="第5章RARP：逆地址解析协议"><a href="#第5章RARP：逆地址解析协议" class="headerlink" title="第5章RARP：逆地址解析协议"></a>第5章RARP：逆地址解析协议</h3><p>1：RARP分组格式和ARP基本一致，帧类型是为0x8035。<br>2：RARP服务器的复杂性在于1：一般要为多个主机（网络上所有的无盘系统）提供硬件地址到IP地址的映射。由于内核一般不读取和分析磁盘文件，因此RARP服务器的功能就由用户进程来提供，且必须能够发送和接收帧类型字段值为0x8035的以太网数据帧。2：RARP请求是在硬件层上进行广播的，不经过路由器进行转发。为了让无盘系统在RARP服务器关机的状态下也能引导，通常在一个网络上（例如一根电缆）要提供多个RARP服务器。</p>
+<h3 id="第6章ICMP：Internet控制报文协议"><a href="#第6章ICMP：Internet控制报文协议" class="headerlink" title="第6章ICMP：Internet控制报文协议"></a>第6章ICMP：Internet控制报文协议</h3><p>1：ICMP报文数据格式：<br><img src="ICMP报文格式.png" alt="ICMP报文格式"><br>2：不同类型的ICMP报文由报文中的类型字段和代码字段来共同决定。<br><img src="ICMP报文类型.png" alt="ICMP报文类型"><br>3：ICMP差错报文必须包括生成该差错报文的数据报IP首部（包含任何选项），还必须至少包括跟在该IP首部后面的前8个字节。因为IP首部包含了协议字段，使得ICMP可以知道如何解释后面的8个字节。</p>
+<h3 id="第7章Ping程序"><a href="#第7章Ping程序" class="headerlink" title="第7章Ping程序"></a>第7章Ping程序</h3><p>1：Ping程序发送一份ICMP回显请求报文给主机，并等待返回ICMP回显应答。<br>2：Ping程序ICMP回显请求和回显应答报文格式：<br><img src="Ping程序ICMP报文格式.png" alt="ICMP回显请求和回显应答报文格式"><br>标识符字段置成发送进程的ID号，序号每次发送自增1。<br>3：Ping程序通过-R选项，以提供记录路由IP的功能。缺点1:并非所有路由都支持路由记录选项；2:单向选项；3:IP首部中只有有限的空间来存放IP地址（最多9个IP）。<br>4：IP数据报中的RR选项的一般格式：<br><img src="IP首部中的记录路由选项的一般格式.png" alt="IP首部中的记录路由选项的一般格式"><br>code值是7；len为总字节长度，即39；ptr指针字段，指向存放下一个IP地址的位置（最小是4，每存放一个IP后加4）<br>5：IP数据报中的时间戳选项格式：<br><img src="IP首部中的时间戳选项的格式.png" alt="IP首部中的时间戳选项的格式"><br>code值是0x44；len为总字节长度；ptr指向下一个可用空间的指针。OF表示溢出字段，FL表示标志字段。有如下3种标志：<br><img src="时间戳选项标志字段.png" alt="时间戳选项标志字段"></p>
+<h3 id="第8章Traceroute程序"><a href="#第8章Traceroute程序" class="headerlink" title="第8章Traceroute程序"></a>第8章Traceroute程序</h3><p>1：Traceroute程序追踪IP数据报从一台主机传到另一台主机所经过的路由。<br>2：Traceroute程序使用ICMP报文和IP首部中的TTL字段（生存周期）。TTL字段初始设置一个8bit的值（推荐设置为64），每个处理数据报的路由器都需要把TTL的值减1或减去数据报在路由器中停留的秒数，因此TTL也可以看成是一个跳站计数器。<br>3：当路由器收到一份IP数据报，如果其TTL字段是0或1，则路由器不转发该数据报（非目的主机，丢弃数据，给源机发回”超时“信息的ICMP报文；目的主机直接处理数据，不会返回ICMP报文），这样可防止数据报在选路时无休止地在网络中流动。<br>4：Traceroute程序操作过程：1发送不可能的UDP端口号（大于30000）的UDP数据报给目的主机，TTL初始为1；2判断返回的ICMP数据报，如果是”超时“报文，则记录IP，同时TTL字段加1，继续发送；如果是”端口不可达”报文，则表示已经到达目的主机，结束发送UDP数据报。<br>5：Traceroute程序注意事项：1不能保证每次UDP数据的路由路径一致；2不能保证UDP数据报和返回的ICMP数据报路由路径一致；3返回的ICMP报文包含的IP是UDP数据到达路由器的IP，非路由器的发送IP（Ping的RR选项是发送地址）。</p>
+<h3 id="第9章IP选路"><a href="#第9章IP选路" class="headerlink" title="第9章IP选路"></a>第9章IP选路</h3><p>1：IP搜索路由表步骤：1搜索匹配的主机地址；2搜索匹配的网络地址；3搜索默认表项（默认表项一般在路由表中被指定为一个网络表项，其网络号为0）。<br>2：ICMP重定向差错一般用来让具有很少选路信息的主机逐渐建立更完善的路由表。当IP数据报应该被发送到另一个路由器R2时，收到数据报的路由器R1（发送端的默认路由）就要发送ICMP重定向差错报文给IP数据报的发送端，目的是完善发送端的路由表，以后可以把数据报直接发送给R2而不是通过R1跳转。<br>3：ICMP重定向报文的格式:<br><img src="ICMP重定向报文的格式.png" alt="ICMP重定向报文的格式"><br>代码0网络重定向；1主机重定向；2服务类型和网络重定向；3服务类型和主机重定向。<br>4：ICMP重定向报文的接收者必须查看三个IP地址：1导致重定向的IP地址（即ICMP重定向报文的数据位于IP数据报的首部）；2发送重定向报文的路由器的IP地址（包含重定向信息的IP数据报中的源地址)；3应该采用的路由器I P地址（在ICMP报文中的4~7字节）。<br>5：ICMP重定向报文规则：1定向报文只能由路由器生成，而不能由主机生成；2重定向报文是为主机而不是为路由器使用的。<br>6：生成ICMP重定向报文条件：1出接口必须等于入接口；2用于向外传送数据报的路由不能被ICMP重定向报文创建或修改过，而且不能是路由器的默认路由；3数据报不能用源站选路来转发；4内核必须配置成可以发送重定向报文。<br>7：主机收到ICMP重定向报文后的检查：1新的路由器必须直接与网络相连接；2重定向报文必须来自当前到目的地所选择的路由器；3重定向报文不能让主机本身作为路由器；4被修改的路由必须是一个间接路由。<br>8：路由器应该发送的只是对主机的重定向（代码1或3)，而不是对网络的重定向。<br>9：初始化路由表的方法：1配置文件中指定静态路由，设置默认路由；2利用ICMP路由器通告和请求报文。<br>10：主机引导后要广播或多播传送一份路由器请求报文，一台或更多台路由器响应一份路由器通告报文；路由器定期地广播或多播传送它们的路由器通告报文，允许每个正在监听的主机相应地更新它们的路由表。<br>11：ICMP路由器请求报文格式：<br><img src="ICMP路由器请求报文格式.png" alt="ICMP路由器请求报文格式"><br>12：ICMP路由器通告报文格式：<br><img src="ICMP路由器通告报文格式.png" alt="ICMP路由器通告报文格式"></p>
+<h3 id="第10章动态选路协议"><a href="#第10章动态选路协议" class="headerlink" title="第10章动态选路协议"></a>第10章动态选路协议</h3><p>1：选路信息协议RI报文包含中在UDP数据报中。格式如下：<br><img src="RIP报文格式.png" alt="RIP报文格式"><br>命令字段为1请求，2应答，3、4废弃不用，5轮询，6轮询表项；RIP度量是以跳计数的，跳数的最大值是15，度量为16表示到无路由到达该IP地址；采用这种20字节格式的RIP报文可以通告多达25条路由。<br>2：RIP常用的UDP端口号是520。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/笔记/" rel="tag"># 笔记</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/Egret-Engine学习（一）/" rel="next" title="Egret Engine学习（一）">
+                <i class="fa fa-chevron-left"></i> Egret Engine学习（一）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/nsq源码阅读--nsqadmin启动流程/" rel="prev" title="nsq源码阅读--nsqadmin启动流程">
+                nsq源码阅读--nsqadmin启动流程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="毛毛大人" />
+          <p class="site-author-name" itemprop="name">毛毛大人</p>
+           
+              <p class="site-description motion-element" itemprop="description">学无止境</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#第1章概述"><span class="nav-number">1.</span> <span class="nav-text">第1章概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第3章IP：网际协议"><span class="nav-number">2.</span> <span class="nav-text">第3章IP：网际协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第4章ARP-地址解析协议"><span class="nav-number">3.</span> <span class="nav-text">第4章ARP:地址解析协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第5章RARP：逆地址解析协议"><span class="nav-number">4.</span> <span class="nav-text">第5章RARP：逆地址解析协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第6章ICMP：Internet控制报文协议"><span class="nav-number">5.</span> <span class="nav-text">第6章ICMP：Internet控制报文协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第7章Ping程序"><span class="nav-number">6.</span> <span class="nav-text">第7章Ping程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第8章Traceroute程序"><span class="nav-number">7.</span> <span class="nav-text">第8章Traceroute程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第9章IP选路"><span class="nav-number">8.</span> <span class="nav-text">第9章IP选路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第10章动态选路协议"><span class="nav-number">9.</span> <span class="nav-text">第10章动态选路协议</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">毛毛大人</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

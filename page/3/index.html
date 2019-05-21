@@ -270,7 +270,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang启动过程学习/">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-gen-fsm/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="毛毛大人">
@@ -292,8 +292,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/Erlang启动过程学习/" itemprop="url">
-                  Erlang启动过程学习
+                <a class="post-title-link" href="/2017/Erlang源码学习-gen-fsm/" itemprop="url">
+                  Erlang源码学习--gen_fsm
                 </a>
               
             
@@ -309,8 +309,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-26T15:16:29+08:00">
-                2017-05-26
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-10T10:55:57+08:00">
+                2017-07-10
               </time>
             
 
@@ -368,10 +368,10 @@
 
       
         
-          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;本文学习Erlang启动过程中涉及到的Erlang源代码。学习环境为linux，Erlang/OTP代码版本是R16B03-1。erl实际上是个shell脚本，设置几个环境变量后，调用exec执行erlexec，代码在/erts/etc/common/erlexec.c中。erlexec分析erl传入的参数和环境变量，选择正确版本的beam(例如在smp环境中，运行的就是 beam.smp 版本的虚拟机)，然后将传入的参数整理好，加入一些默认参数（如-root,-progname,-home），最后通过系统调用execv运行beam虚拟机。执行erl时加上–emu_args选项可以打印出erl启动参数。beam进程入口是erts/emulator/sys/unix/erl_main.c，其中调用erl_start(argc, argv)，通过erl_start进入到Erlang虚拟机的世界了。erl_start函数在erts/emulator/beam/erl_init.c中，主要进行一些底层的初始化工作，如信号处理、初始化数据结构、启动调度器等，其中通过otp_ring0:start/2启动了Erlang虚拟机的第一个进程init。<br>
+          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;gen_fsm是通用的有限状态机模型，通过event触发不同状态下的事件，然后切换到不同状态和数据。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/Erlang启动过程学习/#more" rel="contents">
+            <a class="btn" href="/2017/Erlang源码学习-gen-fsm/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -417,7 +417,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/正则表达式/">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-gen-event/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="毛毛大人">
@@ -439,8 +439,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/正则表达式/" itemprop="url">
-                  正则表达式
+                <a class="post-title-link" href="/2017/Erlang源码学习-gen-event/" itemprop="url">
+                  Erlang源码学习--gen_event
                 </a>
               
             
@@ -456,133 +456,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-02T11:09:42+08:00">
-                2017-05-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;正则表达式（regular expression）描述了一种字符串的匹配模式（pattern），可以用来检查一个串是否含有某种子串、将匹配的子串替换或者从某个串中取出符合某个条件的子串。正则表达式的组件可以是单个的字符、字符集合、字符范围、字符间的选择或者所有这些组件的任意组合。正则表达式是由普通字符（例如字符 a 到 z）以及特殊字符（称为”元字符”）组成的文字模式。模式描述在搜索文本时要匹配的一个或多个字符串。正则表达式作为一个模板，将某个字符模式与所搜索的字符串进行匹配。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/正则表达式/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Vim实用配置和插件/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="毛毛大人">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="充电桩">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/Vim实用配置和插件/" itemprop="url">
-                  Vim实用配置和插件
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-14T11:42:31+08:00">
-                2017-04-14
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-03T11:54:02+08:00">
+                2017-07-03
               </time>
             
 
@@ -604,8 +479,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Vim/" itemprop="url" rel="index">
-                    <span itemprop="name">Vim</span>
+                  <a href="/categories/Erlang/" itemprop="url" rel="index">
+                    <span itemprop="name">Erlang</span>
                   </a>
                 </span>
 
@@ -640,12 +515,10 @@
 
       
         
-          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;本文简单介绍Vim的一些实用配置，比如修改了Vim配置即刻生效，打开文件时定位到上次关闭的位置等，同时介绍一些比较实用的插件及其配置。</p>
-<h3 id="基础配置"><a href="#基础配置" class="headerlink" title="基础配置"></a>基础配置</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&quot; get out of horrible vi-compatible mode</div><div class="line">set nocompatible</div></pre></td></tr></table></figure>
-<p>compatible/nocompatible:This option has the effect of making Vim either more Vi-compatible, or<br>make Vim behave in a more useful way.<br>从说明中可以看出这样设置可以使Vim更好用，而且这里有些配置Vi是不支持的，所以关闭Vi兼容。<br>
+          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;gen_event进程是event handler的管理进程。一个handler对应一个state状态，可动态添加和删除。对于gen_event的每个event，各个handler单独处理，互不影响，互不相关。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/Vim实用配置和插件/#more" rel="contents">
+            <a class="btn" href="/2017/Erlang源码学习-gen-event/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -691,7 +564,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Hexo-GitHub-Pages搭建个人网页/">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-gen-server/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="毛毛大人">
@@ -713,8 +586,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/Hexo-GitHub-Pages搭建个人网页/" itemprop="url">
-                  Hexo + GitHub Pages搭建个人网页
+                <a class="post-title-link" href="/2017/Erlang源码学习-gen-server/" itemprop="url">
+                  Erlang源码学习--gen_server
                 </a>
               
             
@@ -730,8 +603,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-13T15:48:05+08:00">
-                2017-04-13
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-19T14:41:39+08:00">
+                2017-06-19
               </time>
             
 
@@ -753,8 +626,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Git/" itemprop="url" rel="index">
-                    <span itemprop="name">Git</span>
+                  <a href="/categories/Erlang/" itemprop="url" rel="index">
+                    <span itemprop="name">Erlang</span>
                   </a>
                 </span>
 
@@ -789,11 +662,304 @@
 
       
         
-          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;本文简单介绍了在Linux平台下进行Hexo + GitHub Pages搭建个人网页的步骤，主要是根据官方文档来一步步实现最基本的功能(本地写文章和预览 + 部署到GitHub供网络访问)</p>
-<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p>1 Hexo：<a href="https://hexo.io">Hexo官网</a><br>2 GitHub Pages：<a href="https://pages.github.com/">GitHub Pages官网</a><br>3 Hexo-Theme-Next：<a href="http://theme-next.iissnan.com/">Hexo主题NexT</a><br>
+          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;gen_server是简单的client-server模型通用的服务器实现。通过call和cast来进行同步和异步消息请求。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/Hexo-GitHub-Pages搭建个人网页/#more" rel="contents">
+            <a class="btn" href="/2017/Erlang源码学习-gen-server/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-supervisor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/Erlang源码学习-supervisor/" itemprop="url">
+                  Erlang源码学习--supervisor
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-15T14:08:14+08:00">
+                2017-06-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Erlang/" itemprop="url" rel="index">
+                    <span itemprop="name">Erlang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;supervisor是监控树管理进程，监控其管理的子进程的行为，比如启动，关闭，重启策略。supervisor进程是个gen_server行为的进程，其子进程可以在回调函数init/1中指明，然后随supervisor一起启动，也可以在supervisor启动后调用start_child/2来启动。子进程的启动是一个接一个的同步启动，而结束时则按启动顺序的反序进行。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/Erlang源码学习-supervisor/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hengzheng.github.io/2017/Erlang源码学习-application-master/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="毛毛大人">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="充电桩">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/Erlang源码学习-application-master/" itemprop="url">
+                  Erlang源码学习--application_master
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-12T11:04:31+08:00">
+                2017-06-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Erlang/" itemprop="url" rel="index">
+                    <span itemprop="name">Erlang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>&emsp;&emsp;application_master是OTP application的管理进程。application_controller控制Erlang虚拟机中所有的application，而application_master则管理单个application。application配置数据中的mod字段定义了application_master的回调模块和启动参数，回调函数start/5启动的通常为supervisor进程。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/Erlang源码学习-application-master/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -834,7 +1000,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -879,7 +1045,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">20</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -890,7 +1056,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -901,7 +1067,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
